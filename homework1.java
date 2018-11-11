@@ -318,15 +318,16 @@ public class homework1 {
                         //TODO: complete the if
                         if(ast.value .equals( "if") )
                         {
-                        	if(ast.right.right != null)
+                        	if(ast.right != null)
                         	{
-                        		if(ast.right.right.value.equals("else"))
+                        		if(ast.right.value.equals("else"))
                         		{
                         			int la=LAB++; int lb=LAB++;
                         			
                         			coder(ast.left,symbols);
                         			System.out.printf("fjp L%d\n",la);
                         			code(ast.right,symbols);
+                        			
                         			System.out.printf("L%d:\n",lb);
                         		}
                         		else
@@ -350,7 +351,7 @@ public class homework1 {
                         }
                         if(ast.value .equals( "else") )
                         {
-                        	int la=LAB-1; int lb=LAB;
+                        	int la=LAB-2; int lb=LAB-1;
                                    code(ast.left,symbols);
                                    System.out.printf("ujp L%d\n",lb);
                                    System.out.printf("L%d:\n",la);
