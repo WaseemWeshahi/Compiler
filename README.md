@@ -5,5 +5,4 @@ It is the main assignemnt of the "Compilers" course, Semester A 2018/2019.
 
 Team Members:
 
-Waseem Weshahi  206943391
-[Add your names here]
+Bayan Farhan    208300145
