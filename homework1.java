@@ -85,9 +85,10 @@ public class homework1 {
                         }
                         
                         if(tree.value.equals( "content")) {
-                        	tree = tree.left;
-                                   if(tree!= null)
+                        	
+                                   if(tree.left!= null)
                                    {
+                                	   tree = tree.left;
                                                generateSymbolTable(tree);
                                                return null;
                                    }
