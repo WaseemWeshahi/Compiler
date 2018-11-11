@@ -136,6 +136,7 @@ public class homework1 {
                         
                         
                 }
+
                 
                 //Warning: there here we made use out of s.o.println,s.o.print and printf
                 //so it might be a bit messy with getting to new line when printing
@@ -145,62 +146,62 @@ public class homework1 {
                         {                                  
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.println("add\n");
+                                     System.out.printf("add\n");
                         }
                                      
                         if(ast.value .equals( "multiply"))
                         {
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.println("mull\n");
+                                     System.out.printf("mull\n");
                         }
                         
                         if(ast.value.equals( "divide"))
                         {
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.println("div\n");
+                                     System.out.printf("div\n");
                         }
                         
                         if(ast.value.equals( "negative") && ast.right == null ) // or ast.right.vaule=="-1"
                         {
                                      coder(ast.left,symbols);
-                                     System.out.println("neg\n");
+                                     System.out.printf("neg\n");
                         }
                         
                         if(ast.value.equals( "minus"))
                         {
                                    coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.println("sub\n");
+                                    System.out.printf("sub\n");
                         }
                         
                         if(ast.value.equals( "equals"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.println("equ\n");
+                                    System.out.printf("equ\n");
                         }
                         
                         if(ast.value.equals( "notEquals"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                   System.out.println("neq\n");
+                                   System.out.printf("neq\n");
                         }
                         
                         if(ast.value.equals( "and"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.println("and\n");
+                                    System.out.printf("and\n");
                         }
                         
                         if(ast.value.equals( "or"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.println("or\n");
+                                    System.out.printf("or\n");
                         }
                         
                         if(ast.value .equals( "false")) {
@@ -214,25 +215,25 @@ public class homework1 {
                         if(ast.value .equals( "lessThan")) {
                                                     coder(ast.left,symbols);
                                                     coder(ast.right,symbols);
-                                                    System.out.println("les\n");
+                                                    System.out.printf("les\n");
                         }
                         
                         if(ast.value .equals( "lessOrEquals")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.println("leq\n");
+                            System.out.printf("leq\n");
                         }
                        
                         if(ast.value .equals( "greaterOrEquals")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.println("geq\n");
+                            System.out.printf("geq\n");
                         }
                         
                         if(ast.value .equals( "greaterThan")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.println("grt\n");
+                            System.out.printf("grt\n");
                         }
                              
                         if(ast.value .equals( "constReal" ))
@@ -261,7 +262,7 @@ public class homework1 {
                         if(ast.value .equals( "identifier"))
                         { 
                                     codel(ast,symbols);
-                                    System.out.println("ind \n");
+                                    System.out.printf("ind\n");
                         }
                         
                 }
@@ -296,7 +297,7 @@ public class homework1 {
                         {
                                     codel(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.println("sto \n");
+                                    System.out.printf("sto\n");
                         }               
                               
                         
@@ -311,7 +312,7 @@ public class homework1 {
                         
                         if(ast.value .equals( "print")) {
                                                coder(ast.left,symbols);
-                                               System.out.println("print\n");
+                                               System.out.printf("print\n");
                         }
                         //TODO: complete the if
                         if(ast.value .equals( "if") )
@@ -375,7 +376,7 @@ public class homework1 {
                 private static void coded(AST ast,SymbolTable symbols)
                 {
                         
-                        System.out.println("under const... ?");
+                        System.out.printf("under const... ?");
                         
                 }
                
@@ -393,8 +394,8 @@ public class homework1 {
                     }  
                    
                 }
-             
-                }
+}
+            
 
             
 
