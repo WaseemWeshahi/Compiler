@@ -320,7 +320,7 @@ public class homework1 {
                         	{
                         		if(ast.right.right.value.equals("else"))
                         		{
-                        			int la=LAB++; int lb=LAB++;
+                        			int la=LAB++; int lb=la+1;
                         			current_la=la; current_lb=lb;
                         			coder(ast.left,symbols);
                         			System.out.printf("fjp L%d\n",la);
