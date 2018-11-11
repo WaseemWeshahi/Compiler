@@ -85,9 +85,10 @@ public class homework1 {
                         }
                         
                         if(tree.value.equals( "content")) {
-                        	tree = tree.left;
-                                   if(tree!= null)
+                        	
+                                   if(tree.left!= null)
                                    {
+                                	   tree = tree.left;
                                                generateSymbolTable(tree);
                                                return null;
                                    }
@@ -323,7 +324,7 @@ public class homework1 {
                         		if(ast.right.right.value.equals("else"))
                         		{
                         			int la=LAB++; int lb=LAB++;
-                        			current_la=la; current_lb=lb;
+                        			
                         			coder(ast.left,symbols);
                         			System.out.printf("fjp L%d\n",la);
                         			code(ast.right,symbols);
@@ -350,7 +351,7 @@ public class homework1 {
                         }
                         if(ast.value .equals( "else") )
                         {
-                                   int la=current_la; int lb=current_lb; 
+                        	int la=LAB-1; int lb=LAB;
                                    code(ast.left,symbols);
                                    System.out.printf("ujp L%d\n",lb);
                                    System.out.printf("L%d:\n",la);
