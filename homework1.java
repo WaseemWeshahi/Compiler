@@ -288,8 +288,9 @@ public class homework1 {
                                           if(ast.left!=null) {
                                                    code(ast.left,symbols);
                                           }
+                                          if(ast.right!=null) {
                                                 code(ast.right,symbols);
-                                           
+                                          }
                                     
                         }
                         
