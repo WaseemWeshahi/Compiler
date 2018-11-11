@@ -127,7 +127,9 @@ public class homework1 {
                 }
 
                 private static void generatePCode(AST ast, SymbolTable symbolTable) {
-                    // TODO: go over AST and print code
+                	
+                		if(ast == null)
+                			return;
                         ast = ast.right; //now ast begins with the "content" node
                         code(ast,symbolTable);
                         
@@ -151,7 +153,7 @@ public class homework1 {
                         {
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.printf("mull\n");
+                                     System.out.printf("mul\n");
                         }
                         
                         if(ast.value.equals( "divide"))
@@ -250,7 +252,7 @@ public class homework1 {
                         if(ast.value .equals( "not" ))
                         {
                                                   coder(ast.left,symbols);
-                                   System.out.printf("not \n" , ast.left.value); // "value" is a string but we want to print out a number, possible bug
+                                   System.out.printf("not\n" , ast.left.value); // "value" is a string but we want to print out a number, possible bug
                         }
                         
                         if(ast.value .equals( "constInt")) {
@@ -268,12 +270,8 @@ public class homework1 {
                 private static void codel(AST ast,SymbolTable symbols)
                 {
                         if(ast.value .equals( "identifier" ))
-                         {
-                        	if(!SymbolTable.hashtable.containsKey(ast.left.value)) {
-                        		System.out.println("la problemaa!");
-                        		System.out.println(ast.left.value);
-                        	}
-                                    System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
+                         {                        	
+                            System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
                          }
                 }
                 
@@ -365,7 +363,7 @@ public class homework1 {
                                    coder(ast.left,symbols);
                                    System.out.printf("fjp L%d\n",lb);
                                    code(ast.right,symbols);
-                                   System.out.printf("ujp L%d \n",la);
+                                   System.out.printf("ujp L%d\n",la);
                                    System.out.printf("L%d:\n",lb);
                         }
                                    
@@ -387,13 +385,10 @@ public class homework1 {
                     Scanner scanner = new Scanner(System.in);
                         
                     AST ast = AST.createAST(scanner);
-                    if(ast != null)
-                    {
-                        SymbolTable symbolTable = new SymbolTable();
-                         SymbolTable.generateSymbolTable(ast);                        
-                                    generatePCode(ast, symbolTable);
+                    SymbolTable symbolTable = new SymbolTable();
+                    SymbolTable.generateSymbolTable(ast);                        
+                    generatePCode(ast, symbolTable);
                         
-                    }  
                    
                 }
 }
