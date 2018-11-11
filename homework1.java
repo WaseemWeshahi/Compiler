@@ -74,10 +74,9 @@ public class homework1 {
                                    return null;
                         }
                         if(tree.value.equals( "program")) {
-                                   tree = tree.right;
-                                   if(tree!= null)
+                                   if(tree.right!= null)
                                    {
-                                               generateSymbolTable(tree);
+                                               generateSymbolTable(tree.right);
                                                return null;
                                    }
                                    else
@@ -88,18 +87,17 @@ public class homework1 {
                         	
                                    if(tree.left!= null)
                                    {
-                                	   tree = tree.left;
-                                               generateSymbolTable(tree);
+                                               generateSymbolTable(tree.left);
                                                return null;
                                    }
                                   
                         }
                         
                         if(tree.value.equals("scope")) {
-                        	tree = tree.left;
-                        	if(tree!= null)
+                        	if(tree.left!= null)
                             {
-                                        generateSymbolTable(tree);
+
+                                        generateSymbolTable(tree.left);
                                         return null;
                             }
                         	
@@ -109,13 +107,12 @@ public class homework1 {
                                    if(tree.left!=null) {
                                                generateSymbolTable(tree.left);
                                    }
-                                   else if(tree.right!=null)
+                                    if(tree.right!=null)
                                    {
                                    generateSymbolTable(tree.right);
                         
                                    }
-                                   else
-                                               return null;
+                                  
                         }
                         
                         if(tree.value .equals( "var")) {
@@ -272,6 +269,10 @@ public class homework1 {
                 {
                         if(ast.value .equals( "identifier" ))
                          {
+                        	if(!SymbolTable.hashtable.containsKey(ast.left.value)) {
+                        		System.out.println("la problemaa!");
+                        		System.out.println(ast.left.value);
+                        	}
                                     System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
                          }
                 }
@@ -388,8 +389,7 @@ public class homework1 {
                     if(ast != null)
                     {
                         SymbolTable symbolTable = new SymbolTable();
-                         SymbolTable.generateSymbolTable(ast);
-                        
+                         SymbolTable.generateSymbolTable(ast);                        
                                     generatePCode(ast, symbolTable);
                         
                     }  
