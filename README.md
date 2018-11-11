@@ -6,3 +6,5 @@ It is the main assignemnt of the "Compilers" course, Semester A 2018/2019.
 Team Members:
 
 Bayan Farhan    208300145
+
+Waseem Weshahi  206943391
