@@ -1,15 +1,15 @@
-
+/*
+ * Homework 1 in course: Compilers
+ * Submitted By:
+ * Waseem Weshahi	206943391
+ * Bayan Farhan 	208300145	
+ * Omar Khateeb		211706445
+ */
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class homework1 {
-
-            /*
-            * Hints in doing the HW:
-            *   a) Make sure you first understand what you are doing.
-            *   b) Watch Lecture 2 focusing on the code described
-            */
-                        
+	
             static int ADR =5;
             static int LAB =0;
             static int current_la=0;
@@ -66,10 +66,6 @@ public class homework1 {
                         	 hashtable = new HashMap<String,Variable>();
                         }
                     public static  SymbolTable generateSymbolTable(AST tree){
-                        // TODO: create SymbolTable from AST
-                        // goes over the declaration sub tree
-                        // put hashtable.put(ast.value,ADR);
-                        // ADR++;
                         if(tree == null) {
                                    return null;
                         }
@@ -137,9 +133,6 @@ public class homework1 {
                         
                 }
 
-                
-                //Warning: there here we made use out of s.o.println,s.o.print and printf
-                //so it might be a bit messy with getting to new line when printing
                 private static void coder(AST ast,SymbolTable symbols)
                 {        
                         if(ast.value .equals( "plus"))
@@ -252,11 +245,11 @@ public class homework1 {
                         if(ast.value .equals( "not" ))
                         {
                                                   coder(ast.left,symbols);
-                                   System.out.printf("not\n" , ast.left.value); // "value" is a string but we want to print out a number, possible bug
+                                   System.out.printf("not\n" , ast.left.value); 
                         }
                         
                         if(ast.value .equals( "constInt")) {
-                            System.out.printf("ldc %d\n" , (Integer.parseInt(ast.left.value))); // "value" is a string but we want to print out a number, possible bug
+                            System.out.printf("ldc %d\n" , (Integer.parseInt(ast.left.value))); // "value" is a string but we want to print out a number
                         }
                         
                         if(ast.value .equals( "identifier"))
@@ -315,7 +308,7 @@ public class homework1 {
                                                coder(ast.left,symbols);
                                                System.out.printf("print\n");
                         }
-                        //TODO: complete the if
+
                         if(ast.value .equals( "if") )
                         {
                         	if(ast.right != null)

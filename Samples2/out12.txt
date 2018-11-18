@@ -1,0 +1,47 @@
+ldc 5
+ldc 1
+sto
+while_0:
+ldc 5
+ind
+ldc 5
+les
+fjp while_out_1
+ldc 6
+ldc 1
+sto
+while_2:
+ldc 6
+ind
+ldc 10
+les
+fjp while_out_3
+ldc 5
+ind
+ldc 3
+equ
+fjp skip_if_4
+ldc 6
+ind
+print
+ujp while_out_3
+skip_if_4:
+ldc 6
+ldc 6
+ind
+ldc 2
+mul
+sto
+ujp while_2
+while_out_3:
+ldc 5
+ldc 5
+ind
+ldc 1
+add
+sto
+ujp while_0
+while_out_1:
+ldc 5
+ind
+print

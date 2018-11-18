@@ -1,0 +1,20 @@
+program p;
+var
+    a : int;
+    b : int;
+begin
+    a = 1;
+    while (a < 5){
+        b = 1;
+        while (b < 10){
+            if (a == 3){
+                print b;
+                break
+            };
+            b = b * 2
+        };
+        a = a + 1
+    };
+    print a
+end
+

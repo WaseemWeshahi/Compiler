@@ -9,7 +9,7 @@ les
 sto
 ldc 7
 ind
-fjp L0
+fjp skip_if_0
 ldc 6
 print
-L0:
+skip_if_0:
