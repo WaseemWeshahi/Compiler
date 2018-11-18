@@ -8,3 +8,5 @@ Team Members:
 Bayan Farhan    208300145
 
 Waseem Weshahi  206943391
+
+Omar Khateeb 211706445
