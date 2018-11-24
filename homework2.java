@@ -12,6 +12,8 @@ public class homework2 {
 	
             static int ADR =5;
             static int LAB =0;
+            static int SWITCH_LABEL=0;
+            static int last_while;
             static int current_la=0;
             static int current_lb=0;
             
@@ -46,11 +48,13 @@ public class homework2 {
                         
                         int addr;
                         String type;
+                        int is_pointer;//maybe we do not need it
                         
-                        public Variable(String new_type,int new_addr) { //maybe without type
+                        public Variable(String new_type,int new_addr,int pointer) { //maybe without type
                         addr = new_addr;
                         type = new_type;
-                    }
+                        is_pointer = pointer;
+                        }
 
                                                                        
                 }
@@ -112,10 +116,28 @@ public class homework2 {
                         }
                         
                         if(tree.value .equals( "var")) {
-                                   Variable var = new Variable(tree.right.value,ADR); //making a new variable instance, tree.right holds the variable's type
-                                   hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                   ADR++;
                                    
+                        		   if(tree.right.value.equals("pointer"))
+                        		   {
+                        			  if(tree.right.left.value.equals("identifier"))
+                        			   {Variable var = new Variable(tree.right.left.left.value,ADR,1); //making a new variable instance, tree.right holds the variable's type
+                                       hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                                       ADR++; }
+                        			  else
+                        			  {
+                        				  Variable var = new Variable(tree.right.left.value,ADR,1); //making a new variable instance, tree.right holds the variable's type
+                                          hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                                          ADR++;
+                        				  
+                        			  }
+                        		   }
+                        		   else
+                        		   {
+                        			   
+                        			   Variable var = new Variable(tree.right.value,ADR,0); //making a new variable instance, tree.right holds the variable's type
+                        			   hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                        			   ADR++;
+                        		   }
                         }
                         return null;
                     
@@ -266,6 +288,21 @@ public class homework2 {
                          {                        	
                             System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
                          }
+                        if(ast.value .equals( "pointer" ))
+                        {                        	
+                           if(ast.left.value.equals("identifier"))
+                        	{
+                        	   System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.left.value).addr); 
+                        	}
+                           else
+                           {
+                        	   System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
+   
+                           }
+                        	System.out.printf("ind\n");
+
+                        }
+                        
                 }
                 
                 private static void code(AST ast,SymbolTable symbols)
@@ -352,7 +389,7 @@ public class homework2 {
                         }
                         if(ast.value .equals( "while") )
                         {
-                                   int la=LAB++; int lb=LAB++;
+                                   int la=LAB++; int lb=LAB++; last_while=lb;
                                    System.out.printf("L%d:\n",la);
                                    coder(ast.left,symbols);
                                    System.out.printf("fjp L%d\n",lb);
@@ -360,12 +397,58 @@ public class homework2 {
                                    System.out.printf("ujp L%d\n",la);
                                    System.out.printf("L%d:\n",lb);
                         }
-                                   
-                       
-                        
-                                   
+                        if(ast.value.equals("switch"))
+                        {
+                        	int la = SWITCH_LABEL++;
+                        	coder(ast.left,symbols);
+                            System.out.printf("neg \n");
+                            System.out.printf("ixj switch_end_%d:\n",la);
+                            codec(ast.right,la,symbols);
+                            print_labels(ast.right,la);
+                            
+                            System.out.printf("switch_end_%d:\n",la);
 
-                        return;
+                            
+
+                        }
+                        
+                        if(ast.value.equals("break"))
+                        {
+                        	System.out.printf("ujp L%d \n",last_while);
+                        }
+                        
+                       return;
+                }
+                
+                private static void codec(AST ast,int label,SymbolTable symbols)
+                {
+                	
+                	
+                	if(ast.value.equals("caseList"))
+                	{
+                		if(ast.left != null)
+                         {
+                             codec(ast.left,label,symbols);
+                         	
+                         }
+
+                        System.out.printf("case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                        code(ast.right.right,symbols);
+                        System.out.printf("ujp switch_end_%d:\n",label);
+  
+
+                	}
+                }
+                
+                private static void print_labels(AST ast,int label)
+                {
+                	System.out.printf("ujp case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                	if(ast.left != null)
+                    {
+                        
+                		print_labels(ast.left,label);
+                    	
+                    }
                 }
 
                 private static void coded(AST ast,SymbolTable symbols)
