@@ -1,0 +1,69 @@
+﻿
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+	<title>צייר עץ</title>
+    <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
+    
+    <script type="text/javascript">
+    <!--
+        function parse(lines, nodes, edges, pid, level, color)
+        {
+            var label = lines.shift().trim();
+
+            if (label == '~')
+                return;
+
+            var id = nodes.length;
+            
+            nodes.push({id: id, label: label, level: level});
+            if (pid > -1)
+                edges.push({from: pid, to: id, label: color});
+
+            parse(lines, nodes, edges, id, level + 1, 'left');
+            parse(lines, nodes, edges, id, level + 1, 'right');
+        }
+
+        function drawtree(id, textid, heightid)
+        {
+            var nodes = [];
+            var edges = [];
+
+            var text = document.getElementById(textid).value;
+            var lines = text.split('\n');
+
+            parse(lines, nodes, edges, -1, 0);
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            var options = {
+                layout: {
+                    hierarchical: {
+                        direction: 'UD'
+                    }
+                }
+            };
+
+            var container = document.getElementById(id);
+            container.style.height = document.getElementById(heightid).value + 'px';
+            var graph = new vis.Network(container, data, options);
+
+            return graph;
+        }
+    -->
+    </script>
+</head>
+<body>
+    <div class="content q" style="direction: ltr">
+        Tree:
+        <textarea id="treetext" style="width: 98%" rows="20"></textarea>
+        Drawing Height (in pixels):
+        <input type="text" id="treeheight" value="1000"></input>
+        <button onclick="drawtree('tree', 'treetext', 'treeheight')">Draw Tree</button>
+        <div id="tree">&nbsp;</div>
+    </div>
+</body>
+</html>
+
