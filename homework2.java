@@ -13,6 +13,7 @@ public class homework2 {
             static int ADR =5;
             static int LAB =0;
             static int SWITCH_LABEL=0;
+            static int last_while;
             static int current_la=0;
             static int current_lb=0;
             
@@ -388,7 +389,7 @@ public class homework2 {
                         }
                         if(ast.value .equals( "while") )
                         {
-                                   int la=LAB++; int lb=LAB++;
+                                   int la=LAB++; int lb=LAB++; last_while=lb;
                                    System.out.printf("L%d:\n",la);
                                    coder(ast.left,symbols);
                                    System.out.printf("fjp L%d\n",lb);
@@ -410,6 +411,12 @@ public class homework2 {
                             
 
                         }
+                        
+                        if(ast.value.equals("break"))
+                        {
+                        	System.out.printf("ujp L%d \n",last_while);
+                        }
+                        
                        return;
                 }
                 
