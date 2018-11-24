@@ -12,6 +12,7 @@ public class homework2 {
 	
             static int ADR =5;
             static int LAB =0;
+            static int SWITCH_LABEL=0;
             static int current_la=0;
             static int current_lb=0;
             
@@ -46,7 +47,7 @@ public class homework2 {
                         
                         int addr;
                         String type;
-                        int is_pointer;
+                        int is_pointer;//maybe we do not need it
                         
                         public Variable(String new_type,int new_addr,int pointer) { //maybe without type
                         addr = new_addr;
@@ -395,12 +396,52 @@ public class homework2 {
                                    System.out.printf("ujp L%d\n",la);
                                    System.out.printf("L%d:\n",lb);
                         }
-                                   
-                       
-                        
-                                   
+                        if(ast.value.equals("switch"))
+                        {
+                        	int la = SWITCH_LABEL++;
+                        	coder(ast.left,symbols);
+                            System.out.printf("neg \n");
+                            System.out.printf("ixj switch_end_%d:\n",la);
+                            codec(ast.right,la,symbols);
+                            print_labels(ast.right,la);
+                            
+                            System.out.printf("switch_end_%d:\n",la);
 
-                        return;
+                            
+
+                        }
+                       return;
+                }
+                
+                private static void codec(AST ast,int label,SymbolTable symbols)
+                {
+                	
+                	
+                	if(ast.value.equals("caseList"))
+                	{
+                		if(ast.left != null)
+                         {
+                             codec(ast.left,label,symbols);
+                         	
+                         }
+
+                        System.out.printf("case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                        code(ast.right.right,symbols);
+                        System.out.printf("ujp switch_end_%d:\n",label);
+  
+
+                	}
+                }
+                
+                private static void print_labels(AST ast,int label)
+                {
+                	System.out.printf("ujp case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                	if(ast.left != null)
+                    {
+                        
+                		print_labels(ast.left,label);
+                    	
+                    }
                 }
 
                 private static void coded(AST ast,SymbolTable symbols)
