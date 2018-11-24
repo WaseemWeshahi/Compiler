@@ -46,11 +46,13 @@ public class homework2 {
                         
                         int addr;
                         String type;
+                        int is_pointer;
                         
-                        public Variable(String new_type,int new_addr) { //maybe without type
+                        public Variable(String new_type,int new_addr,int pointer) { //maybe without type
                         addr = new_addr;
                         type = new_type;
-                    }
+                        is_pointer = pointer;
+                        }
 
                                                                        
                 }
@@ -112,10 +114,28 @@ public class homework2 {
                         }
                         
                         if(tree.value .equals( "var")) {
-                                   Variable var = new Variable(tree.right.value,ADR); //making a new variable instance, tree.right holds the variable's type
-                                   hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                   ADR++;
                                    
+                        		   if(tree.right.value.equals("pointer"))
+                        		   {
+                        			  if(tree.right.left.value.equals("identifier"))
+                        			   {Variable var = new Variable(tree.right.left.left.value,ADR,1); //making a new variable instance, tree.right holds the variable's type
+                                       hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                                       ADR++; }
+                        			  else
+                        			  {
+                        				  Variable var = new Variable(tree.right.left.value,ADR,1); //making a new variable instance, tree.right holds the variable's type
+                                          hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                                          ADR++;
+                        				  
+                        			  }
+                        		   }
+                        		   else
+                        		   {
+                        			   
+                        			   Variable var = new Variable(tree.right.value,ADR,0); //making a new variable instance, tree.right holds the variable's type
+                        			   hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                        			   ADR++;
+                        		   }
                         }
                         return null;
                     
@@ -266,6 +286,21 @@ public class homework2 {
                          {                        	
                             System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
                          }
+                        if(ast.value .equals( "pointer" ))
+                        {                        	
+                           if(ast.left.value.equals("identifier"))
+                        	{
+                        	   System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.left.value).addr); 
+                        	}
+                           else
+                           {
+                        	   System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
+   
+                           }
+                        	System.out.printf("ind\n");
+
+                        }
+                        
                 }
                 
                 private static void code(AST ast,SymbolTable symbols)
