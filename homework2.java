@@ -49,126 +49,182 @@ public class homework2 {
                 static final class Variable{
                     // Think! what does a Variable contain?
                         
-                        int addr;
-                        String type;
-                        int offset;
-                        
+                        int addr;       //address of Variable
+                        String type;    //Type of Variable (pointer/array/record)
+                        int offset;     //Used for record
+                        int size;       //Size of variable
+                        int sizeOfSlot; //Size of array slot (used only for arrays)
+                        int subPart;    //Subpart of array (used only for arrays)
+                        int dims;       // Number of dimensions
+                        int** dim;//2-d array of dimensions (used only for arrays
                         public Variable(String new_type,int new_addr,int offs) { //maybe without type
                         addr = new_addr;
                         type = new_type;
                         offset = offs;
                         }
 
+                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int** new_dim) {
+                        addr = new_addr;
+                        type = new_type;
+                        size=new_arraySize;
+                        sizeOfSlot=new_sizeOfSlot;
+                        dims=new_dims;
+                        subPart=new_subPart;
+                        dim=new_dim;
+                    }
+
                                                                        
                 }
 
-                static final class SymbolTable{
-                    // Think! what does a SymbolTable contain?
-                        public static HashMap<String,Variable> hashtable;
-                        
-                        public SymbolTable(HashMap<String,Variable> hash) {
-                                   hashtable = hash;
-                        } 
-                        public SymbolTable() {
-                                    hashtable = new HashMap<String,Variable>();
-                        }
-                    public static  SymbolTable generateSymbolTable(AST tree){
-                        if(tree == null) {
-                                   return null;
-                        }
-                        if(tree.value.equals( "program")) {
-                                   if(tree.right!= null)
-                                   {
-                                               generateSymbolTable(tree.right);
-                                               return null;
-                                   }
-                                   else
-                                               return null;
-                        }
-                        
-                        if(tree.value.equals( "content")) {
-                                   
-                                   if(tree.left!= null)
-                                   {
-                                               generateSymbolTable(tree.left);
-                                               return null;
-                                   }
-                                  
-                        }
-                        
-                        if(tree.value.equals("scope")) {
-                                   if(tree.left!= null)
-                            {
+    static final class SymbolTable {
+        // Think! what does a SymbolTable contain?
+        public static HashMap<String, Variable> hashtable;
 
-                                        generateSymbolTable(tree.left);
-                                        return null;
-                            }
-                                   
-                        }
-                        
-                        if(tree.value .equals( "declarationsList")) {
-                                   if(tree.left!=null) {
-                                               generateSymbolTable(tree.left);
-                                   }
-                                    if(tree.right!=null)
-                                   {
-                                   generateSymbolTable(tree.right);
-                        
-                                   }
-                                  
-                        }
-                        
-                        if(tree.value .equals( "var")) 
-                        {
-                                   
-                                               if(should_increment == 1)
-                                               {
-                                                           global_offset++;
-                                               }
-                                               if(tree.right.value.equals("pointer"))
-                                                  {
-                                                             if(tree.right.left.value.equals("identifier"))
-                                                              {Variable var = new Variable(tree.right.left.left.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
-                                       hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                       ADR++; }
-                                                             else
-                                                             {
-                                                                         Variable var = new Variable(tree.right.left.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
-                                          hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                          ADR++;
-                                                                         
-                                                             }
-                                                  }
-                                                  //TO-DO:: (maybe) take care of gloab addr and bla bla bla
-                                                  else if(tree.right.value.equals("record"))
-                                                  {
-                                                              
-                                                              Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
-                                                              hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                                             
-                                                              should_increment=1;
-                                                              int temp2=global_offset;
-                                                              global_offset=-1;
-                                                              if(tree.right.left!=null)
-                                                              {
-                                                                          generateSymbolTable(tree.right.left);
-                                                              }
-                                                              should_increment=0;
-                                                              global_offset=temp2;
-                                                  }
-                                                  
-                                                  else
-                                                  {
-                                                              
-                                                              Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
-                                                              hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                                                              ADR++;
-                                                  }
-                        }
-                        return null;
-                    
+        public int getArrayDimension(AST tree) {    // Calcualtes number of Dimensions
+            if (tree == null)
+                return 0;
+            else if (tree.value.equals == "range")
+                return 1;
+            else
+                return getArrayDimension(tree.left) + getArrayDimension(tree.right);
+        }
+
+        public void fillArrayDimension(AST tree, int index,int** arr)   // Calculate the range of each Dimension of array
+        {
+            if(tree==null)
+                return;
+            if(tree=="range") {
+                arr[1][index] = Integer.parseInt(tree.left.left.value); // should convert to int (not sure of function)
+                arr[2][index]=Integer.parseInt(tree.right.left.value);  // should conver to int (not sure of function)
+                index++;
+            }
+            fillArrayDimension(tree.left,index,arr);
+            fillArrayDimension(tree.right,index,arr);
+        }
+        public SymbolTable(HashMap<String,Variable> hash) {
+            hashtable = hash;
+        }
+        public SymbolTable() {
+            hashtable = new HashMap<String,Variable>();
+        }
+
+
+
+        public static  SymbolTable generateSymbolTable(AST tree){
+            if(tree == null) {
+                return null;
+            }
+            if(tree.value.equals( "program")) {
+                if(tree.right!= null)
+                {
+                    generateSymbolTable(tree.right);
+                    return null;
                 }
+                else
+                    return null;
+            }
+            if(tree.value.equals( "content")) {
+                if(tree.left!= null)
+                {
+                    generateSymbolTable(tree.left);
+                    return null;
                 }
+            }
+            if(tree.value.equals("scope")) {
+                if(tree.left!= null)
+                {
+                    generateSymbolTable(tree.left);
+                    return null;
+                }
+            }
+            if(tree.value .equals( "declarationsList")) {
+                if(tree.left!=null) {
+                    generateSymbolTable(tree.left);
+                }
+                if(tree.right!=null)
+                {
+                    generateSymbolTable(tree.right);
+                }
+            }
+            if(tree.value .equals( "var"))
+            {
+                if(should_increment == 1)
+                {
+                    global_offset++;
+                }
+                if(tree.right.value.equals("pointer"))
+                {
+                    if(tree.left.value.equals("identifier"))
+                    {Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                        hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                        ADR++; }
+                    else
+                    {
+                        Variable var = new Variable(tree.right.left.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                        hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                        ADR++;
+                    }
+                }
+//TO-DO:: (maybe) take care of gloab addr and bla bla bla
+                else if(tree.right.value.equals("record"))
+                {
+                    Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                    should_increment=1;
+                    int temp2=global_offset;
+                    global_offset=-1;
+                    if(tree.right.left!=null)
+                    {
+                        generateSymbolTable(tree.right.left);
+                    }
+                    should_increment=0;
+                    global_offset=temp2;
+                }
+                else if(tree.right.value.equals("array"))
+                {
+                    int i,j,sum=1,arraysize=1,subPart=0,sizeOfSlot=1;
+                    int dims=getArrayDimension(tree);   // get array Dimensions
+                    int[][] dim=new int[2][dims];
+                    fillArrayDimension(tree,0,dim);// get array Dimensions range
+                    string arrayType=tree.right.right.value;// Calculate array slot size
+                    if(arrayType=="identifier")
+                    {
+                        arrayType = tree.right.right.right.value;
+                        sizeOfSlot=SymbolTable.hashtable.get(arrayType).size;
+                    }
+
+                    for(i=0;i<dims;i++) {       // Calculate SubPart
+                        sum=1;
+                        for (j = i + 1; j < dims; j++)
+                            sum=sum*(dim[2][j]-dim[1][j]+1);
+                        subPart=subPart+sum*sizeOfSlot;
+                    }
+
+                    for (i=0; i < dims; i++)        // Calcualte array size
+                        arraysize=arraysize*(dim[2][j]-dim[1][j]+1);
+
+
+
+                    Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim);
+                    hashtable.put(tree.left.left.value,var);
+                    ADR=ADR+arraysize;
+
+
+
+
+                }
+                else
+                {
+                    Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                    ADR++;
+                }
+
+
+            }
+            return null;
+        }
+    }
 
                 private static void generatePCode(AST ast, SymbolTable symbolTable) {
                         
@@ -313,6 +369,13 @@ public class homework2 {
 
 
                         }
+                    if(ast.value.equals("array"))
+                    {
+                        codel(ast,symbols);
+                        System.out.printf("ind\n");
+
+
+                    }
                         
                 }
 
@@ -354,12 +417,44 @@ public class homework2 {
                         }
                         if(ast.value.equals("array"))
                         {
-                                   codel(ast.left,symbols);
+                                   coder(ast.left,symbols);
+                                   indexToAddress(ast.right,symbols,SymbolTable.hashtable.get(ast.left.left.value),SymbolTable.hashtable.get(ast.left.left.value).dim);
+
+
             
                         }
                         
                 }
-                
+
+                private static void indexToAddress(AST tree,SymbolTable symbols,Variable var,dim) {
+                    if (tree == null)
+                        return ;
+                    if (tree.left !="IndexList") {
+                        coder(ast.left, symbols);
+                        int i = 0, sum = 1;
+                        for (i = dim + 1; i < var.dims; i++)
+                            sum = sum * (var.dim[2][i] - var.dim[1][i] + 1);
+                        System.out.printf("ixa %d\n", sum);
+                        dim++;
+
+                    }
+                    indexToAddress(tree.left,symbols,var,dim)
+                    if (tree.right != null) {
+                        coder(ast.left, symbols);
+                        int i = 0, sum = 1;
+                        for (i = dim + 1; i < var.dims; i++)
+                            sum = sum * (var.dim[2][i] - var.dim[1][i] + 1);
+                        System.out.printf("ixa %d\n", sum);
+                        dim++;
+
+                    }
+
+
+
+
+
+
+                }
                 private static void code(AST ast,SymbolTable symbols)
                 {
                         
