@@ -56,14 +56,14 @@ public class homework2 {
                         int sizeOfSlot; //Size of array slot (used only for arrays)
                         int subPart;    //Subpart of array (used only for arrays)
                         int dims;       // Number of dimensions
-                        int** dim;//2-d array of dimensions (used only for arrays
+                        int[][] dim;//2-d array of dimensions (used only for arrays
                         public Variable(String new_type,int new_addr,int offs) { //maybe without type
                         addr = new_addr;
                         type = new_type;
                         offset = offs;
                         }
 
-                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int** new_dim) {
+                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim) {
                         addr = new_addr;
                         type = new_type;
                         size=new_arraySize;
@@ -71,6 +71,8 @@ public class homework2 {
                         dims=new_dims;
                         subPart=new_subPart;
                         dim=new_dim;
+
+
                     }
 
                                                                        
@@ -80,26 +82,28 @@ public class homework2 {
         // Think! what does a SymbolTable contain?
         public static HashMap<String, Variable> hashtable;
 
-        public int getArrayDimension(AST tree) {    // Calcualtes number of Dimensions
+        public static int getArrayDimension(AST tree) {    // Calcualtes number of Dimensions
             if (tree == null)
                 return 0;
-            else if (tree.value.equals == "range")
+            else if (tree.value.equals("range"))
                 return 1;
             else
                 return getArrayDimension(tree.left) + getArrayDimension(tree.right);
         }
 
-        public void fillArrayDimension(AST tree, int index,int** arr)   // Calculate the range of each Dimension of array
+        public static void fillArrayDimension(AST tree, int[] index,int[][] arr)   // Calculate the range of each Dimension of array
         {
-            if(tree==null)
-                return;
-            if(tree=="range") {
-                arr[1][index] = Integer.parseInt(tree.left.left.value); // should convert to int (not sure of function)
-                arr[2][index]=Integer.parseInt(tree.right.left.value);  // should conver to int (not sure of function)
-                index++;
+
+            if(tree == null)
+                return ;
+            if(tree.value.equals("range")) {
+                arr[0][index[0]] = Integer.parseInt(tree.left.left.value); // should convert to int (not sure of function)
+                arr[1][index[0]]=Integer.parseInt(tree.right.left.value);  // should conver to int (not sure of function)
+                index[0]++;
             }
             fillArrayDimension(tree.left,index,arr);
             fillArrayDimension(tree.right,index,arr);
+
         }
         public SymbolTable(HashMap<String,Variable> hash) {
             hashtable = hash;
@@ -185,23 +189,25 @@ public class homework2 {
                     int i,j,sum=1,arraysize=1,subPart=0,sizeOfSlot=1;
                     int dims=getArrayDimension(tree);   // get array Dimensions
                     int[][] dim=new int[2][dims];
-                    fillArrayDimension(tree,0,dim);// get array Dimensions range
-                    string arrayType=tree.right.right.value;// Calculate array slot size
-                    if(arrayType=="identifier")
+                    int[] index = new int[1];
+                    fillArrayDimension(tree,index,dim);// get array Dimensions range
+
+                  //  string arrayType=tree.right.right.value;// Calculate array slot size
+                    if(tree.right.right.value.equals("identifier"))
                     {
-                        arrayType = tree.right.right.right.value;
-                        sizeOfSlot=SymbolTable.hashtable.get(arrayType).size;
+                       // arrayType = tree.right.right.right.value;
+                        sizeOfSlot=SymbolTable.hashtable.get(tree.right.right.right.value).size;
                     }
 
-                    for(i=0;i<dims;i++) {       // Calculate SubPart
+                    for(i=0;i<dims;i++) {// Calculate SubPart
                         sum=1;
                         for (j = i + 1; j < dims; j++)
-                            sum=sum*(dim[2][j]-dim[1][j]+1);
-                        subPart=subPart+sum*sizeOfSlot;
+                            sum=sum*(dim[1][j]-dim[0][j]+1);
+                        subPart=subPart+sum*sizeOfSlot*dim[0][i];
                     }
 
                     for (i=0; i < dims; i++)        // Calcualte array size
-                        arraysize=arraysize*(dim[2][j]-dim[1][j]+1);
+                        arraysize=arraysize*(dim[1][i]-dim[0][i]+1);
 
 
 
@@ -417,44 +423,61 @@ public class homework2 {
                         }
                         if(ast.value.equals("array"))
                         {
-                                   coder(ast.left,symbols);
-                                   indexToAddress(ast.right,symbols,SymbolTable.hashtable.get(ast.left.left.value),SymbolTable.hashtable.get(ast.left.left.value).dim);
+
+                                    int[] dim=new int[1];
+                                   codel(ast.left,symbols);
+                                   indexToAddress(ast.right,symbols,SymbolTable.hashtable.get(ast.left.left.value),dim);
+                                   System.out.printf("dec %d\n",SymbolTable.hashtable.get(ast.left.left.value).subPart );
 
 
-            
+
                         }
                         
                 }
 
-                private static void indexToAddress(AST tree,SymbolTable symbols,Variable var,dim) {
+                public static void indexToAddress(AST tree,SymbolTable symbols,Variable var,int[] dim)
+                {
                     if (tree == null)
-                        return ;
-                    if (tree.left !="IndexList") {
-                        coder(ast.left, symbols);
+                        return;
+                  /*  if(tree.left != null)
+                    if (!(tree.left.value.equals("IndexList"))) {
+                        coder(tree.left, symbols);
                         int i = 0, sum = 1;
                         for (i = dim + 1; i < var.dims; i++)
-                            sum = sum * (var.dim[2][i] - var.dim[1][i] + 1);
+                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
                         System.out.printf("ixa %d\n", sum);
                         dim++;
 
+                    }*/
+                    if (tree.left == null) {
+                        coder(tree.right, symbols);
+                        int i = 0, sum = 1;
+
+                        for (i = dim[0]+1 ; i < var.dims; i++) {
+                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
+
+                        }
+
+                        System.out.printf("ixa %d\n", sum);
+                        dim[0]++;
+                        return;
                     }
-                    indexToAddress(tree.left,symbols,var,dim)
+
+
+                    indexToAddress(tree.left,symbols,var,dim);
                     if (tree.right != null) {
-                        coder(ast.left, symbols);
+                        coder(tree.right, symbols);
                         int i = 0, sum = 1;
-                        for (i = dim + 1; i < var.dims; i++)
-                            sum = sum * (var.dim[2][i] - var.dim[1][i] + 1);
+                        for (i = dim[0]+1 ; i < var.dims; i++) {
+                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
+                            //System.out.printf("when dim is:%d , sum is: %d\n",dim, sum);
+                        }
                         System.out.printf("ixa %d\n", sum);
-                        dim++;
+                        dim[0]++;
 
                     }
-
-
-
-
-
-
                 }
+
                 private static void code(AST ast,SymbolTable symbols)
                 {
                         
@@ -569,7 +592,7 @@ public class homework2 {
                         
                        return;
                 }
-                
+
                 private static void codec(AST ast,int label,SymbolTable symbols)
                 {
                         
