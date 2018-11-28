@@ -406,8 +406,9 @@ public class homework2 {
                                    }
                            else if(ast.left.value.equals("pointer"))
                            {
-                               System.out.printf("ind\n");
                                codel(ast.left,symbols);
+
+                        	   System.out.printf("ind\n");
                            }
                            else
                            {
@@ -416,7 +417,7 @@ public class homework2 {
                                // System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr);
    
                            }
-                                   System.out.printf("ind\n");
+                                   
 
                         }
                         if(ast.value.equals("record"))
@@ -431,7 +432,10 @@ public class homework2 {
                                    else
                                    {
 
-                                               codel(ast.left,symbols);                                
+                                               codel(ast.left,symbols); 
+                                               if(ast.left.value.equals("pointer"))
+                                            	   System.out.printf("ind \n");
+
                                                System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
                                    }
                         }
@@ -439,11 +443,14 @@ public class homework2 {
                         {
                             Variable var;
                                     int[] dim=new int[1];
+                                   
                                    codel(ast.left,symbols);
+                                   
                                    if(SymbolTable.hashtable.containsKey(ast.left.left.value) )
                                        var=SymbolTable.hashtable.get(ast.left.left.value);
                                    else
                                        var=pointsTo(ast.left,symbols);
+                                   
                             System.out.printf(ast.left.left.value);
                                    indexToAddress(ast.right,symbols,var,dim);
                                    System.out.printf("dec %d\n",var.subPart );
@@ -500,27 +507,18 @@ public class homework2 {
 
                 public static Variable pointsTo(AST tree,SymbolTable symbols)
                 {
-Variable var;
-                    System.out.printf("aaaaa");
-                    System.out.printf(tree.value);
+                	
                     if(tree.value.equals("identifier"))
                         return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));
                     if(tree.value.equals("record"))
                         return (pointsTo(tree.right,symbols));
                     if(tree.value.equals("array"))
                         return (pointsTo(tree.left,symbols));
-                    //var=SymbolTable.hashtable.get(pointsTo(tree.left,symbols));
-
-                   // return  (SymbolTable.hashtable.get(      var.points2            ));
-
-                    return  (SymbolTable.hashtable.get(       SymbolTable.hashtable.get(pointsTo(tree.left,symbols)).points2            ));
-                   // return ((SymbolTable.hashtable.get(SymbolTable.hashtable.get(pointsTo(tree.left,symbols))).points2));
-
-
-
-
+                    if( tree.value.equals("pointer"))
+                        return (pointsTo(tree.left,symbols));
+                    Variable var = new Variable("",0,0,"");
+                    return var;
                 }
-
                 private static void code(AST ast,SymbolTable symbols)
                 {
                         
