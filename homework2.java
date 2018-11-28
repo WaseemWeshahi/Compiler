@@ -403,6 +403,8 @@ public class homework2 {
                            if(ast.left.value.equals("identifier"))
                                    {
                                       System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.left.value).addr); 
+                               	   System.out.printf("ind\n");
+
                                    }
                            else if(ast.left.value.equals("pointer"))
                            {
@@ -414,6 +416,8 @@ public class homework2 {
                            {
                                        // if(symbols.hashtable.contains(ast.left.value))
                                codel(ast.left,symbols);
+                        	   System.out.printf("ind\n");
+
                                // System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr);
    
                            }
@@ -433,8 +437,7 @@ public class homework2 {
                                    {
 
                                                codel(ast.left,symbols); 
-                                               if(ast.left.value.equals("pointer"))
-                                            	   System.out.printf("ind \n");
+                                              
 
                                                System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
                                    }
