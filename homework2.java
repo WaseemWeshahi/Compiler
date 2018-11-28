@@ -57,13 +57,17 @@ public class homework2 {
                         int subPart;    //Subpart of array (used only for arrays)
                         int dims;       // Number of dimensions
                         int[][] dim;//2-d array of dimensions (used only for arrays
-                        public Variable(String new_type,int new_addr,int offs) { //maybe without type
+                    String points2;
+                    public Variable(){}
+                    public Variable(String new_type,int new_addr,int offs,String new_pointsTo) { //maybe without type
                         addr = new_addr;
                         type = new_type;
                         offset = offs;
+                        points2= new_pointsTo;
+
                         }
 
-                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim) {
+                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim,String   new_pointsTo) {
                         addr = new_addr;
                         type = new_type;
                         size=new_arraySize;
@@ -71,6 +75,7 @@ public class homework2 {
                         dims=new_dims;
                         subPart=new_subPart;
                         dim=new_dim;
+                        points2= new_pointsTo;
 
 
                     }
@@ -159,12 +164,12 @@ public class homework2 {
                 if(tree.right.value.equals("pointer"))
                 {
                     if(tree.left.value.equals("identifier"))
-                    {Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++; }
                     else
                     {
-                        Variable var = new Variable(tree.right.left.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.left.value); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++;
                     }
@@ -172,7 +177,7 @@ public class homework2 {
 //TO-DO:: (maybe) take care of gloab addr and bla bla bla
                 else if(tree.right.value.equals("record"))
                 {
-                    Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1"); //making a new variable instance, tree.right holds the variable's type
                     hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                     should_increment=1;
                     int temp2=global_offset;
@@ -210,8 +215,10 @@ public class homework2 {
                         arraysize=arraysize*(dim[1][i]-dim[0][i]+1);
 
 
-
-                    Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim);
+                    String type="1";
+                    if(tree.right.right.equals("identifier"))
+                        type=tree.right.right.left.value;
+                    Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type);
                     hashtable.put(tree.left.left.value,var);
                     ADR=ADR+arraysize;
 
@@ -221,7 +228,7 @@ public class homework2 {
                 }
                 else
                 {
-                    Variable var = new Variable(tree.right.value,ADR,global_offset); //making a new variable instance, tree.right holds the variable's type
+                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1   "); //making a new variable instance, tree.right holds the variable's type
                     hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                     ADR++;
                 }
@@ -397,9 +404,16 @@ public class homework2 {
                                    {
                                       System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.left.value).addr); 
                                    }
+                           else if(ast.left.value.equals("pointer"))
+                           {
+                               System.out.printf("ind\n");
+                               codel(ast.left,symbols);
+                           }
                            else
                            {
-                                      System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr); 
+                                       // if(symbols.hashtable.contains(ast.left.value))
+                               codel(ast.left,symbols);
+                               // System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr);
    
                            }
                                    System.out.printf("ind\n");
@@ -423,11 +437,16 @@ public class homework2 {
                         }
                         if(ast.value.equals("array"))
                         {
-
+                            Variable var;
                                     int[] dim=new int[1];
                                    codel(ast.left,symbols);
-                                   indexToAddress(ast.right,symbols,SymbolTable.hashtable.get(ast.left.left.value),dim);
-                                   System.out.printf("dec %d\n",SymbolTable.hashtable.get(ast.left.left.value).subPart );
+                                   if(SymbolTable.hashtable.containsKey(ast.left.left.value) )
+                                       var=SymbolTable.hashtable.get(ast.left.left.value);
+                                   else
+                                       var=pointsTo(ast.left,symbols);
+                            System.out.printf(ast.left.left.value);
+                                   indexToAddress(ast.right,symbols,var,dim);
+                                   System.out.printf("dec %d\n",var.subPart );
 
 
 
@@ -449,6 +468,7 @@ public class homework2 {
                         dim++;
 
                     }*/
+
                     if (tree.left == null) {
                         coder(tree.right, symbols);
                         int i = 0, sum = 1;
@@ -476,6 +496,29 @@ public class homework2 {
                         dim[0]++;
 
                     }
+                }
+
+                public static Variable pointsTo(AST tree,SymbolTable symbols)
+                {
+Variable var;
+                    System.out.printf("aaaaa");
+                    System.out.printf(tree.value);
+                    if(tree.value.equals("identifier"))
+                        return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));
+                    if(tree.value.equals("record"))
+                        return (pointsTo(tree.right,symbols));
+                    if(tree.value.equals("array"))
+                        return (pointsTo(tree.left,symbols));
+                    //var=SymbolTable.hashtable.get(pointsTo(tree.left,symbols));
+
+                   // return  (SymbolTable.hashtable.get(      var.points2            ));
+
+                    return  (SymbolTable.hashtable.get(       SymbolTable.hashtable.get(pointsTo(tree.left,symbols)).points2            ));
+                   // return ((SymbolTable.hashtable.get(SymbolTable.hashtable.get(pointsTo(tree.left,symbols))).points2));
+
+
+
+
                 }
 
                 private static void code(AST ast,SymbolTable symbols)
