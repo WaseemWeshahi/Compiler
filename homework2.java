@@ -473,16 +473,6 @@ public class homework2 {
                     if (tree == null)
                         return;
 
-                  /*  if(tree.left != null)
-                    if (!(tree.left.value.equals("IndexList"))) {
-                        coder(tree.left, symbols);
-                        int i = 0, sum = 1;
-                        for (i = dim + 1; i < var.dims; i++)
-                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
-                        System.out.printf("ixa %d\n", sum);
-                        dim++;*/
-
-
 
                     if (tree.left == null) {
                         coder(tree.right, symbols);
@@ -531,7 +521,7 @@ public class homework2 {
 
                         return (pointsTo(tree.left, symbols));
 
-                    }
+                    }//asd
                    Variable var=pointsTo(tree.left,symbols);
 
                    if(var.points2=="1")
