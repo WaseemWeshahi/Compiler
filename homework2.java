@@ -59,13 +59,15 @@ public class homework2 {
                         int[][] dim;//2-d array of dimensions (used only for arrays
                     String points2;
                     public Variable(){}
-                    public Variable(String new_type,int new_addr,int offs,String new_pointsTo) { //maybe without type
+                    public Variable(String new_type,int new_addr,int offs,String new_pointsTo,int new_size) { //maybe without type
                         addr = new_addr;
                         type = new_type;
                         offset = offs;
                         points2= new_pointsTo;
-                        size=2;
+                        size=new_size;
+
                         }
+
 
                     public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim,String   new_pointsTo) {
                         addr = new_addr;
@@ -165,24 +167,22 @@ public class homework2 {
                 {
                     String pointsTo = "1";
                     if(tree.right.left.value.equals("identifier"))
-                        pointsTo=tree.right.left.left.value;
-                    if(tree.left.value.equals("identifier"))
-                    {
-                        Variable var = new Variable(tree.right.value,ADR,global_offset,pointsTo); //making a new variable instance, tree.right holds the variable's type
+                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value,1); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++; }
                     else
                     {
-                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,pointsTo); //making a new variable instance, tree.right holds the variable's type
+                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.value,1); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++;
                     }
                 }
+
 //TO-DO:: (maybe) take care of gloab addr and bla bla bla
                 else if(tree.right.value.equals("record"))
                 {
-                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1"); //making a new variable instance, tree.right holds the variable's type
-                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                	Variable var = new Variable(tree.right.value,ADR,global_offset,"1",1); //making a new variable instance, tree.right holds the variable's type
+                    
                     should_increment=1;
                     int temp2=global_offset;
                     global_offset=-1;
@@ -192,6 +192,8 @@ public class homework2 {
                     }
                     should_increment=0;
                     global_offset=temp2;
+                   var.size=update_size(tree.right.left);
+                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                 }
                 else if(tree.right.value.equals("array"))
                 {
@@ -232,7 +234,7 @@ public class homework2 {
                 }
                 else
                 {
-                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1   "); //making a new variable instance, tree.right holds the variable's type
+                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1   ",1); //making a new variable instance, tree.right holds the variable's type
                     hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                     ADR++;
                 }
@@ -252,6 +254,21 @@ public class homework2 {
                         
                         
                         
+                }
+                private static int update_size(AST ast)
+                {
+                	int size=0;
+                	if(ast.value.equals("declarationsList"))
+                	{
+                		size+=update_size(ast.right);
+                		if(ast.left!=null)
+                			size+=update_size(ast.left);
+                	}
+                	else if(ast.value.equals("var"))
+                	{
+                		return SymbolTable.hashtable.get(ast.left.left.value).size;
+                	}
+                	return size;
                 }
 
                 private static void coder(AST ast,SymbolTable symbols)
