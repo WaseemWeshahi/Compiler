@@ -453,8 +453,7 @@ public class homework2 {
                                        var=SymbolTable.hashtable.get(ast.left.left.value);
                                    else
                                        var=pointsTo(ast.left,symbols);
-                                   
-                            System.out.printf(ast.left.left.value);
+
                                    indexToAddress(ast.right,symbols,var,dim);
                                    System.out.printf("dec %d\n",var.subPart );
 
@@ -468,16 +467,7 @@ public class homework2 {
                 {
                     if (tree == null)
                         return;
-                  /*  if(tree.left != null)
-                    if (!(tree.left.value.equals("IndexList"))) {
-                        coder(tree.left, symbols);
-                        int i = 0, sum = 1;
-                        for (i = dim + 1; i < var.dims; i++)
-                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
-                        System.out.printf("ixa %d\n", sum);
-                        dim++;
 
-                    }*/
 
                     if (tree.left == null) {
                         coder(tree.right, symbols);
@@ -508,19 +498,20 @@ public class homework2 {
                     }
                 }
 
-                public static Variable pointsTo(AST tree,SymbolTable symbols)
-                {
-                	
-                    if(tree.value.equals("identifier"))
+                public static Variable pointsTo(AST tree,SymbolTable symbols) {
+
+                    if (tree.value.equals("identifier")) {
                         return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));
+                    }
                     if(tree.value.equals("record"))
                         return (pointsTo(tree.right,symbols));
                     if(tree.value.equals("array"))
                         return (pointsTo(tree.left,symbols));
-                    if( tree.value.equals("pointer"))
-                        return (pointsTo(tree.left,symbols));
-                    Variable var = new Variable("",0,0,"");
-                    return var;
+
+                   Variable var=pointsTo(tree.left,symbols);
+                   if(var.points2=="1")
+                       return var;
+                   return (SymbolTable.hashtable.get(var.points2));
                 }
                 private static void code(AST ast,SymbolTable symbols)
                 {
