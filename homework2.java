@@ -64,7 +64,7 @@ public class homework2 {
                         type = new_type;
                         offset = offs;
                         points2= new_pointsTo;
-
+                        size=2;
                         }
 
                     public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim,String   new_pointsTo) {
@@ -163,13 +163,17 @@ public class homework2 {
                 }
                 if(tree.right.value.equals("pointer"))
                 {
+                    String pointsTo = "1";
+                    if(tree.right.left.value.equals("identifier"))
+                        pointsTo=tree.right.left.left.value;
                     if(tree.left.value.equals("identifier"))
-                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value); //making a new variable instance, tree.right holds the variable's type
+                    {
+                        Variable var = new Variable(tree.right.value,ADR,global_offset,pointsTo); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++; }
                     else
                     {
-                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.left.value); //making a new variable instance, tree.right holds the variable's type
+                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,pointsTo); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++;
                     }
@@ -201,7 +205,7 @@ public class homework2 {
                     if(tree.right.right.value.equals("identifier"))
                     {
                        // arrayType = tree.right.right.right.value;
-                        sizeOfSlot=SymbolTable.hashtable.get(tree.right.right.right.value).size;
+                        sizeOfSlot=SymbolTable.hashtable.get(tree.right.right.left.value).size;
                     }
 
                     for(i=0;i<dims;i++) {// Calculate SubPart
@@ -213,10 +217,10 @@ public class homework2 {
 
                     for (i=0; i < dims; i++)        // Calcualte array size
                         arraysize=arraysize*(dim[1][i]-dim[0][i]+1);
-
+                    arraysize=arraysize*sizeOfSlot;
 
                     String type="1";
-                    if(tree.right.right.equals("identifier"))
+                    if(tree.right.right.value.equals("identifier"))
                         type=tree.right.right.left.value;
                     Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type);
                     hashtable.put(tree.left.left.value,var);
@@ -454,6 +458,7 @@ public class homework2 {
                                    else
                                        var=pointsTo(ast.left,symbols);
 
+
                                    indexToAddress(ast.right,symbols,var,dim);
                                    System.out.printf("dec %d\n",var.subPart );
 
@@ -468,6 +473,16 @@ public class homework2 {
                     if (tree == null)
                         return;
 
+                  /*  if(tree.left != null)
+                    if (!(tree.left.value.equals("IndexList"))) {
+                        coder(tree.left, symbols);
+                        int i = 0, sum = 1;
+                        for (i = dim + 1; i < var.dims; i++)
+                            sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
+                        System.out.printf("ixa %d\n", sum);
+                        dim++;*/
+
+
 
                     if (tree.left == null) {
                         coder(tree.right, symbols);
@@ -478,7 +493,7 @@ public class homework2 {
 
                         }
 
-                        System.out.printf("ixa %d\n", sum);
+                        System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
                         dim[0]++;
                         return;
                     }
@@ -492,7 +507,7 @@ public class homework2 {
                             sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
                             //System.out.printf("when dim is:%d , sum is: %d\n",dim, sum);
                         }
-                        System.out.printf("ixa %d\n", sum);
+                        System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
                         dim[0]++;
 
                     }
@@ -500,19 +515,32 @@ public class homework2 {
 
                 public static Variable pointsTo(AST tree,SymbolTable symbols) {
 
-                    if (tree.value.equals("identifier")) {
-                        return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));
-                    }
-                    if(tree.value.equals("record"))
-                        return (pointsTo(tree.right,symbols));
-                    if(tree.value.equals("array"))
-                        return (pointsTo(tree.left,symbols));
 
+
+                    if (tree.value.equals("identifier")){
+                        return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));}
+                    if(tree.value.equals("record")) {
+                        if(tree.right.value.equals("identifier"))
+                            return (SymbolTable.hashtable.get(tree.right.left.value));
+                        else
+                            return pointsTo(tree.right,symbols);
+                    //    Variable var=pointsTo(tree.right,symbols);
+                      //  return (var);
+                    }
+                    if(tree.value.equals("array")) {
+
+                        return (pointsTo(tree.left, symbols));
+
+                    }
                    Variable var=pointsTo(tree.left,symbols);
+
                    if(var.points2=="1")
                        return var;
+
+
                    return (SymbolTable.hashtable.get(var.points2));
                 }
+
                 private static void code(AST ast,SymbolTable symbols)
                 {
                         
@@ -650,7 +678,7 @@ public class homework2 {
                 
                 private static void print_labels(AST ast,int label)
                 {
-                        System.out.printf("ujp case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                        System.out.printf("ujp case_%d_%d\n",label,Integer.parseInt(ast.right.left.left.value));
                         if(ast.left != null)
                     {
                         
