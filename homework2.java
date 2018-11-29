@@ -616,10 +616,10 @@ public class homework2 {
                         }
                         if(ast.value.equals("switch"))
                         {
-                                   int la = SWITCH_LABEL++;
+                                   int la = LAB++;
                                    coder(ast.left,symbols);
                             System.out.printf("neg \n");
-                            System.out.printf("ixj switch_end_%d:\n",la);
+                            System.out.printf("ixj switch_end_%d\n",la);
                             codec(ast.right,la,symbols);
                             print_labels(ast.right,la);
                             
@@ -651,7 +651,7 @@ public class homework2 {
 
                         System.out.printf("case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
                         code(ast.right.right,symbols);
-                        System.out.printf("ujp switch_end_%d:\n",label);
+                        System.out.printf("ujp switch_end_%d\n",label);
   
 
                         }
