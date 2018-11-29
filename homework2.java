@@ -644,7 +644,7 @@ public class homework2 {
                         {
                                    int la = LAB++;
                                    coder(ast.left,symbols);
-                            System.out.printf("neg \n");
+                            System.out.printf("neg\n");
                             System.out.printf("ixj switch_end_%d\n",la);
                             codec(ast.right,la,symbols);
                             print_labels(ast.right,la);
@@ -657,7 +657,7 @@ public class homework2 {
                         
                         if(ast.value.equals("break"))
                         {
-                                   System.out.printf("ujp L%d \n",last_while);
+                                   System.out.printf("ujp L%d\n",last_while);
                         }
                         
                        return;
