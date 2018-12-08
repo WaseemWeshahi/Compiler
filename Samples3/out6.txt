@@ -1,0 +1,45 @@
+P:
+ssp 10
+ujp P_begin
+P_begin:
+lda 0 6
+inc 0
+ldc 6
+sto
+lda 0 9
+lda 0 6
+inc 0
+ind
+sto
+lda 0 9
+ind
+inc 1
+ldc 6
+sto
+lda 0 9
+ind
+inc 1
+ind
+inc 2
+ldc 5
+sto
+lda 0 5
+ldc 1
+ixa 1
+dec 1
+ldc 1000.500000
+sto
+lda 0 9
+ind
+inc 1
+ind
+inc 2
+ind
+ldc 1
+ixa 1
+dec 1
+ind
+ldc 2.000000
+div
+print
+stp

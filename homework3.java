@@ -8,7 +8,8 @@
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class homework2 {
+
+public class homework3 {
             
             static int ADR =5;
             static int LAB =0;
@@ -19,6 +20,10 @@ public class homework2 {
             
             static int current_la=0;
             static int current_lb=0;
+            static int SSP=5;
+            static String lastProg="";
+            static int FunctionNum=0;
+            static boolean allowedToEnter=false;
             
 
                 // Abstract Syntax Tree
@@ -57,19 +62,22 @@ public class homework2 {
                         int subPart;    //Subpart of array (used only for arrays)
                         int dims;       // Number of dimensions
                         int[][] dim;//2-d array of dimensions (used only for arrays
-                    String points2;
+                        String points2;
+                        int funcSequence;
+                    
                     public Variable(){}
-                    public Variable(String new_type,int new_addr,int offs,String new_pointsTo,int new_size) { //maybe without type
+                    public Variable(String new_type,int new_addr,int offs,String new_pointsTo,int new_size,int num) { //maybe without type
                         addr = new_addr;
                         type = new_type;
                         offset = offs;
                         points2= new_pointsTo;
                         size=new_size;
+                        funcSequence = num;
 
                         }
 
 
-                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim,String   new_pointsTo) {
+                    public Variable(String new_type,int new_addr,int new_arraySize,int new_sizeOfSlot,int new_dims,int  new_subPart,int[][] new_dim,String   new_pointsTo,int num) {
                         addr = new_addr;
                         type = new_type;
                         size=new_arraySize;
@@ -78,6 +86,7 @@ public class homework2 {
                         subPart=new_subPart;
                         dim=new_dim;
                         points2= new_pointsTo;
+                        funcSequence = num;
 
 
                     }
@@ -88,6 +97,7 @@ public class homework2 {
     static final class SymbolTable {
         // Think! what does a SymbolTable contain?
         public static HashMap<String, Variable> hashtable;
+        public static HashMap<String,String> functions;
 
         public static int getArrayDimension(AST tree) {    // Calcualtes number of Dimensions
             if (tree == null)
@@ -117,6 +127,7 @@ public class homework2 {
         }
         public SymbolTable() {
             hashtable = new HashMap<String,Variable>();
+            functions = new HashMap<String,String>();
         }
 
 
@@ -126,7 +137,17 @@ public class homework2 {
                 return null;
             }
             if(tree.value.equals( "program")) {
-                if(tree.right!= null)
+                if(tree.left.left.left!=null)
+                {
+                	System.out.printf("%s:\n",tree.left.left.left.value);
+                	lastProg = tree.left.left.left.value;
+                	functions.put("p",Integer.toString(FunctionNum));
+                	FunctionNum++;
+   
+
+                }
+            	
+            	if(tree.right!= null)
                 {
                     generateSymbolTable(tree.right);
                     return null;
@@ -138,26 +159,86 @@ public class homework2 {
                 if(tree.left!= null)
                 {
                     generateSymbolTable(tree.left);
-                    return null;
                 }
+                if(tree.right!= null)
+                {
+                    generateSymbolTable(tree.right);
+                }
+                return null;
+
             }
             if(tree.value.equals("scope")) {
                 if(tree.left!= null)
                 {
-                    generateSymbolTable(tree.left);
-                    return null;
+                    int temp = SSP;
+                    SSP=5;
+                	generateSymbolTable(tree.left);
+                	System.out.printf("SSP %d \n",SSP);
+                	System.out.printf("ujp %s_begin \n",lastProg);
+                	SSP=temp;
+                    
                 }
+               
+                return null;
             }
             if(tree.value .equals( "declarationsList")) {
-                if(tree.left!=null) {
+                
+            	if(tree.left!=null) {
                     generateSymbolTable(tree.left);
+                    
                 }
                 if(tree.right!=null)
                 {
                     generateSymbolTable(tree.right);
+                    SSP+=hashtable.get(tree.right.left.left.value).size;
                 }
             }
-            if(tree.value .equals( "var"))
+            
+            if(tree.value.equals( "procedure")) {
+                
+            	
+            	if(tree.left!=null)
+                {
+                    generateSymbolTable(tree.left);
+                }
+            	functions.put(tree.left.left.left.value,Integer.toString(FunctionNum));
+            	
+            	
+            }
+            if(tree.value.equals("identifierAndParameters"))
+            {
+            	String temp = lastProg;
+            	System.out.printf("%s:\n",tree.left.left.value);
+            	lastProg = tree.left.left.value;
+            	generateSymbolTable(tree.right);
+            	System.out.printf("ssp %d \n",SSP);
+            	System.out.printf("ujp %s_begin\n",lastProg);
+            	lastProg = temp;
+            }
+            if(tree.value.equals("inOutParameters"))
+            {
+            	int temp = SSP;
+            	generateSymbolTable(tree.left);
+            	
+            }
+            if(tree.value.equals("parametersList"))
+            {
+            	if(tree.left!=null)
+                {
+                    generateSymbolTable(tree.left);
+                }
+
+            	if(tree.right!=null)
+            	{
+            		generateSymbolTable(tree.right);
+            		
+            	}
+            	
+            }
+            
+            
+            
+            if(tree.value .equals( "var") || allowedToEnter)
             {
                 if(should_increment == 1)
                 {
@@ -167,12 +248,12 @@ public class homework2 {
                 {
                     String pointsTo = "1";
                     if(tree.right.left.value.equals("identifier"))
-                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value,1); //making a new variable instance, tree.right holds the variable's type
+                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value,1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++; }
                     else
                     {
-                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.value,1); //making a new variable instance, tree.right holds the variable's type
+                        Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.value,1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
                         hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                         ADR++;
                     }
@@ -181,7 +262,7 @@ public class homework2 {
 //TO-DO:: (maybe) take care of gloab addr and bla bla bla
                 else if(tree.right.value.equals("record"))
                 {
-                	Variable var = new Variable(tree.right.value,ADR,global_offset,"1",1); //making a new variable instance, tree.right holds the variable's type
+                	Variable var = new Variable(tree.right.value,ADR,global_offset,"1",1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
                     
                     should_increment=1;
                     int temp2=global_offset;
@@ -224,7 +305,7 @@ public class homework2 {
                     String type="1";
                     if(tree.right.right.value.equals("identifier"))
                         type=tree.right.right.left.value;
-                    Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type);
+                    Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type,FunctionNum);
                     hashtable.put(tree.left.left.value,var);
                     ADR=ADR+arraysize;
 
@@ -234,11 +315,19 @@ public class homework2 {
                 }
                 else
                 {
-                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1   ",1); //making a new variable instance, tree.right holds the variable's type
+                    Variable var = new Variable(tree.right.value,ADR,global_offset,"1   ",1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
                     hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
                     ADR++;
                 }
 
+
+            }
+            if(tree.value.equals("byValue") && !allowedToEnter)
+            {
+            	allowedToEnter=true;
+            	generateSymbolTable(tree);
+            	allowedToEnter=false;
+            	SSP+=hashtable.get(tree.left.left.value).size;
 
             }
             return null;
@@ -250,11 +339,42 @@ public class homework2 {
                                    if(ast == null)
                                                return;
                         ast = ast.right; //now ast begins with the "content" node
+                        if(ast.left.right!=null)
+                        {
+                        	makeFunctions(ast.left.right,symbolTable);
+                        }
+                        System.out.printf("%s_begin:\n",lastProg);
                         code(ast,symbolTable);
+                        System.out.printf("stp\n");
                         
                         
                         
                 }
+                private static void makeFunctions(AST ast,SymbolTable symbolTable)
+                {
+                	if(ast.left!=null)
+                	{
+                		makeFunctions(ast.left,symbolTable);
+                	}
+                	if(ast.right!=null)
+                	{
+                		String temp = lastProg;
+                		lastProg = ast.right.left.left.left.value;
+                		ADR=5;
+                		symbolTable.generateSymbolTable(ast.right);
+                		if(ast.right.right!=null&& ast.right.right.right!=null)
+                		{
+                			System.out.printf("%s_begin:\n",ast.right.left.left.left.value);
+                			code(ast.right.right.right,symbolTable);
+                			if(ast.right.value.equals("procedure")) {
+                			System.out.printf("retp\n");
+                			}
+                		}
+                		FunctionNum++;
+                		lastProg=temp;
+                	}
+                }
+                
                 private static int update_size(AST ast)
                 {
                 	int size=0;
@@ -659,10 +779,35 @@ public class homework2 {
                         {
                                    System.out.printf("ujp L%d\n",last_while);
                         }
+                        if(ast.value.equals("call"))
+                        {
+
+                        	
+                        	int mstVal = Math.abs(Integer.parseInt(symbols.functions.get(ast.left.left.value))-Integer.parseInt(symbols.functions.get(lastProg))-1) ;
+                        	
+                        	System.out.printf("mst %d\n",mstVal);
+                        	int numOfArgs = sendArgs(ast.right,symbols);
+                        	System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value);
+                        }
                         
                        return;
                 }
-
+                
+                private static int sendArgs(AST ast,SymbolTable symbols)
+                {
+                	int res=0;
+                	if(ast.left!=null)
+                		res+=sendArgs(ast.left,symbols);
+                	codel(ast.right,symbols);
+                	if(((symbols.hashtable.get(ast.right.left.value)).type).equals("array"))
+                	{
+                		System.out.printf("movs %d \n",((symbols.hashtable.get(ast.right.left.value)).size));
+                	}
+                	res+=((symbols.hashtable.get(ast.right.left.value)).size);
+                	return res;
+                	
+                }
+                
                 private static void codec(AST ast,int label,SymbolTable symbols)
                 {
                         

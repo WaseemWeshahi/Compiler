@@ -1,0 +1,14 @@
+program p;
+var
+    a : array[1..1] of int;
+    b : ^a;
+    c : ^b;
+    d : ^c;
+begin
+    b = 5;
+    c = 6;
+    d = 7;
+    a[1] = 8;
+    print d^^^[1]
+end
+
