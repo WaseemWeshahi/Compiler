@@ -1,0 +1,111 @@
+P:
+ssp 8
+ujp P_begin
+P_begin:
+lda 0 5
+ldc 5
+sto
+L0:
+lda 0 5
+ind
+ldc 0
+grt
+fjp L1
+lda 0 6
+ldc 1
+sto
+L2:
+lda 0 6
+ind
+lda 0 5
+ind
+les
+fjp L3
+lda 0 6
+ind
+print
+lda 0 6
+lda 0 6
+ind
+ldc 1
+add
+sto
+ujp L2
+L3:
+lda 0 5
+lda 0 5
+ind
+ldc 1
+sub
+sto
+ujp L0
+L1:
+ldc 0
+fjp L4
+ldc 15
+print
+L4:
+ldc 1
+fjp L5
+ldc 42
+print
+ujp L6
+L5:
+ldc 16
+print
+L6:
+ldc 2
+neg
+ixj L7
+case_0_1:
+ldc 0
+print
+ujp L7
+case_0_2:
+ujp L7
+case_0_3:
+ldc 1
+print
+ldc 2
+print
+ujp L7
+ujp case_0_3
+ujp case_0_2
+ujp case_0_1
+L7:
+lda 0 5
+ldc 5
+ldc 6
+mul
+ldc 0
+add
+sto
+lda 0 5
+lda 0 5
+ind
+neg
+sto
+lda 0 5
+ind
+print
+lda 0 7
+ldc 1
+sto
+lda 0 7
+lda 0 7
+ind
+not
+sto
+lda 0 7
+lda 0 7
+ind
+lda 0 5
+ind
+ldc 0
+les
+or
+sto
+lda 0 7
+ind
+print
+stp

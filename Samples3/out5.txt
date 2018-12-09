@@ -1,0 +1,29 @@
+P:
+ssp 9
+ujp P_begin
+P_begin:
+lda 0 6
+ldc 5
+sto
+lda 0 7
+ldc 6
+sto
+lda 0 8
+ldc 7
+sto
+lda 0 5
+ldc 1
+ixa 1
+dec 1
+ldc 8
+sto
+lda 0 8
+ind
+ind
+ind
+ldc 1
+ixa 1
+dec 1
+ind
+print
+stp

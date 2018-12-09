@@ -1,0 +1,20 @@
+P:
+ssp 8
+ujp P_begin
+P_begin:
+lda 0 5
+ldc 5.000000
+sto
+lda 0 7
+lda 0 5
+ind
+ldc 6.000000
+les
+sto
+lda 0 7
+ind
+fjp L0
+ldc 6
+print
+L0:
+stp

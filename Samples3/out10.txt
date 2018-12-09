@@ -1,0 +1,76 @@
+P:
+ssp 13
+ujp P_begin
+P_begin:
+lda 0 11
+ldc 1
+sto
+L0:
+lda 0 11
+ind
+ldc 2
+leq
+fjp L1
+lda 0 12
+ldc 1
+sto
+L2:
+lda 0 12
+ind
+ldc 2
+leq
+fjp L3
+lda 0 7
+lda 0 11
+ind
+ixa 2
+dec 2
+lda 0 12
+ind
+ixa 1
+dec 1
+lda 0 11
+ind
+ldc 50
+mul
+lda 0 12
+ind
+ldc 20
+mul
+add
+sto
+lda 0 12
+lda 0 12
+ind
+ldc 1
+add
+sto
+ujp L2
+L3:
+lda 0 11
+lda 0 11
+ind
+ldc 1
+add
+sto
+ujp L0
+L1:
+lda 0 7
+ldc 1
+ixa 2
+dec 2
+ldc 1
+ixa 1
+dec 1
+ind
+lda 0 7
+ldc 2
+ixa 2
+dec 2
+ldc 2
+ixa 1
+dec 1
+ind
+add
+print
+stp

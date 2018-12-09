@@ -1,0 +1,55 @@
+P:
+ssp 27
+ujp P_begin
+P_begin:
+lda 0 5
+inc 0
+ldc 1
+sto
+L0:
+lda 0 5
+inc 0
+ind
+ldc 20
+leq
+fjp L1
+lda 0 5
+inc 1
+inc 1
+inc 0
+lda 0 5
+inc 0
+ind
+ixa 1
+dec 1
+lda 0 5
+inc 0
+ind
+sto
+lda 0 5
+inc 0
+lda 0 5
+inc 0
+ind
+ldc 1
+add
+sto
+ujp L0
+L1:
+lda 0 5
+inc 1
+inc 1
+inc 0
+ldc 5
+ixa 1
+dec 1
+ind
+inc 1
+inc 1
+inc 0
+ldc 5
+ixa 1
+dec 1
+ind
+print
+stp

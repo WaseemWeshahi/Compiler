@@ -1,0 +1,49 @@
+A:
+ssp 57
+ujp A_begin
+A_begin:
+lda 0 5
+ldc 10
+ixa 4
+ldc 7
+ixa 1
+dec 9
+ldc 12
+sto
+lda 0 56
+ldc 10
+sto
+lda 0 45
+ldc 17
+ixa 1
+dec 10
+ldc 7
+sto
+lda 0 5
+ldc 6
+ixa 4
+ldc 7
+ixa 1
+dec 9
+lda 0 5
+lda 0 56
+ind
+ixa 4
+lda 0 45
+ldc 17
+ixa 1
+dec 10
+ind
+ixa 1
+dec 9
+ind
+sto
+lda 0 5
+ldc 6
+ixa 4
+ldc 7
+ixa 1
+dec 9
+ind
+print
+stp
