@@ -17,14 +17,15 @@ public class homework3 {
             static int last_while;
             static int should_increment=0;
             static int global_offset=-1;
-            
-            static int current_la=0;
-            static int current_lb=0;
             static int SSP=5;
             static String lastProg="";
             static int FunctionNum=0;
             static int sizeOfParameters=0;
             static boolean allowedToEnter=false;
+            static boolean computing=false;
+            static int SEP = 0;
+            static int MAX_SEP =0;
+            
             
 
                 // Abstract Syntax Tree
@@ -65,6 +66,8 @@ public class homework3 {
                         int[][] dim;//2-d array of dimensions (used only for arrays
                         String points2;
                         int funcSequence;
+                        int SEP;
+                        int SSP;
                     
                     public Variable(){}
                     public Variable(String new_type,int new_addr,int offs,String new_pointsTo,int new_size,int num) { //maybe without type
@@ -74,6 +77,8 @@ public class homework3 {
                         points2= new_pointsTo;
                         size=new_size;
                         funcSequence = num;
+                        this.SEP =-1;
+                        this.SSP=-1;
 
                         }
 
@@ -88,6 +93,8 @@ public class homework3 {
                         dim=new_dim;
                         points2= new_pointsTo;
                         funcSequence = num;
+                        this.SEP=-1;
+                        this.SSP=-1;
 
 
                     }
@@ -138,8 +145,8 @@ public class homework3 {
             if(tree.value.equals( "program")) {
                 if(tree.left.left.left!=null)
                 {
-                	System.out.printf("%s:\n",tree.left.left.left.value);
-                	lastProg = tree.left.left.left.value;
+                	System.out.printf("%s:\n",tree.left.left.left.value.toUpperCase());
+                	lastProg = tree.left.left.left.value.toUpperCase();
                 	
                 	
    
@@ -161,7 +168,9 @@ public class homework3 {
                 }
                 if(tree.right!= null)
                 {
-                    generateSymbolTable(tree.right);
+                	
+
+                	generateSymbolTable(tree.right);
                 }
                 return null;
 
@@ -178,7 +187,7 @@ public class homework3 {
                     
                 }
             	System.out.printf("SSP %d \n",SSP);
-            	System.out.printf("ujp %s_begin \n",lastProg);
+            	
             	String type = "void";
             	Variable var = new Variable(type,0,global_offset,"1   ",SSP,FunctionNum);
             	hashtable.put(lastProg, var);
@@ -212,11 +221,13 @@ public class homework3 {
             if(tree.value.equals("identifierAndParameters"))
             {
             	String temp = lastProg;
-            	System.out.printf("%s:\n",tree.left.left.value);
-            	lastProg = tree.left.left.value;
+            	if(!computing)
+            	{
+            		System.out.printf("%s:\n",tree.left.left.value.toUpperCase());
+            	}
+            	lastProg = tree.left.left.value.toUpperCase();
             	generateSymbolTable(tree.right);
-            	System.out.printf("ssp %d \n",SSP);
-            	System.out.printf("ujp %s_begin\n",lastProg);
+            	hashtable.get(tree.left.left.value.toUpperCase()).SSP=SSP;
             	lastProg = temp;
             }
             if(tree.value.equals("inOutParameters"))
@@ -349,14 +360,78 @@ public class homework3 {
     }
 
                 private static void generatePCode(AST ast, SymbolTable symbolTable) {
-                        
                                    if(ast == null)
                                                return;
+                        String curProg=lastProg;
                         ast = ast.right; //now ast begins with the "content" node
                         if(ast.left.right!=null)
                         {
-                        	makeFunctions(ast.left.right,symbolTable);
+                        	computing=true;
+                        	makeFunctions(ast.left.right,symbolTable,ast,lastProg);
+                        	int tempLAB=LAB;
+                        	int tempSWITCH_LABEL=SWITCH_LABEL;
+                        	int tempshould_increment=should_increment;
+                        	int tempSSP=SSP;
+                        	String templastProg = lastProg;
+                        	int tempFunctionNum=FunctionNum;
+                        	int tempsizeOfParameters=sizeOfParameters;
+                        	int tempSEP=SEP;
+                        	int tempMAX_SEP=MAX_SEP;
+                        	SEP=0;
+                        	MAX_SEP=0;
+                			code(ast,symbolTable);	
+                			
+                			
+                			System.out.printf("sep %d \n",MAX_SEP);
+                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                        	
+                        	computing = false;
+                        	LAB =tempLAB;
+                        	SWITCH_LABEL=tempSWITCH_LABEL;
+                            should_increment=tempshould_increment;
+                            SSP=tempSSP;
+                            lastProg=templastProg;
+                            FunctionNum=tempFunctionNum;
+                            sizeOfParameters=tempsizeOfParameters;
+                            
+                            SEP = tempSEP;
+                            MAX_SEP =tempMAX_SEP;
+                            System.out.printf("ujp %s_begin \n",lastProg);
+                        	makeFunctions(ast.left.right,symbolTable,ast,lastProg);
+
+                        	
+
                         }
+                        else
+                        {
+                        	computing = true;
+                        	int tempLAB=LAB;
+                        	int tempSWITCH_LABEL=SWITCH_LABEL;
+                        	int tempshould_increment=should_increment;
+                        	int tempSSP=SSP;
+                        	String templastProg = lastProg;
+                        	int tempFunctionNum=FunctionNum;
+                        	int tempsizeOfParameters=sizeOfParameters;
+                        	int tempSEP=SEP;
+                        	int tempMAX_SEP=MAX_SEP;
+                			code(ast,symbolTable);	
+                			
+                			System.out.printf("sep %d \n",MAX_SEP);
+                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                        	System.out.printf("ujp %s_begin \n",lastProg);
+                        	computing = false;
+                        	LAB =tempLAB;
+                        	SWITCH_LABEL=tempSWITCH_LABEL;
+                            should_increment=tempshould_increment;
+                            SSP=tempSSP;
+                            lastProg=templastProg;
+                            FunctionNum=tempFunctionNum;
+                            sizeOfParameters=tempsizeOfParameters;
+                            
+                            SEP = tempSEP;
+                            MAX_SEP =tempMAX_SEP;
+                        }
+                        lastProg=curProg;
                         System.out.printf("%s_begin:\n",lastProg);
                         code(ast,symbolTable);
                         System.out.printf("stp\n");
@@ -364,33 +439,93 @@ public class homework3 {
                         
                         
                 }
-                private static void makeFunctions(AST ast,SymbolTable symbolTable)
+                private static void makeFunctions(AST ast,SymbolTable symbolTable,AST parent,String parentName)
                 {
-                	if(ast.left!=null)
+                	if(!computing && symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SEP!=-1 )
                 	{
-                		makeFunctions(ast.left,symbolTable);
+                		System.out.printf("%s:\n", ast.right.left.left.left.value.toUpperCase());
+                		System.out.printf("ssp %d\n",symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SSP);
+                		System.out.printf("sep %d\n",symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SEP);
+        				System.out.printf("ujp %s_begin\n",ast.right.left.left.left.value);
+                	}
+        			if(ast.left!=null)
+                	{
+                		makeFunctions(ast.left,symbolTable,parent,parentName);
                 	}
                 	if(ast.right!=null)
                 	{
                 		String temp = lastProg;
-                		lastProg = ast.right.left.left.left.value;
-                		ADR=5;
+                		lastProg = ast.right.left.left.left.value.toUpperCase();
+                		if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
+                			ADR=5;
+                			symbolTable.generateSymbolTable(ast.right);}
+                		if(symbolTable.hashtable.get(lastProg).SEP==-1)
+                		{	
+                			
+                    		
+                    		boolean tempComputing = computing;
+                			computing = true;
                 		
-                		symbolTable.generateSymbolTable(ast.right);
                 		
-                		if(ast.right.right!=null&& ast.right.right.right!=null)
-                		{
-                			System.out.printf("%s_begin:\n",ast.right.left.left.left.value);
-                			code(ast.right.right.right,symbolTable);
-                			if(ast.right.value.equals("procedure")) {
-                			System.out.printf("retp\n");
+                			//symbolTable.generateSymbolTable(ast.right);
+                			int tempLAB=LAB;
+                			int tempSWITCH_LABEL=SWITCH_LABEL;
+                			int tempshould_increment=should_increment;
+                			int tempSSP=SSP;
+                			String templastProg = lastProg;
+                			int tempsizeOfParameters=sizeOfParameters;
+                			int tempSEP=SEP;
+                			int tempMAX_SEP=MAX_SEP;
+                			SEP=0;
+                			MAX_SEP=0;
+                		
+                		
+                			if(ast.right.right!=null&& ast.right.right.right!=null)
+                			{
+                				if(!computing)
+                				{
+                					System.out.printf("%s_begin:\n",ast.right.left.left.left.value);
+                				}
+                				code(ast.right.right.right,symbolTable);
+                				if(ast.right.value.equals("procedure") && !computing) {
+                					System.out.printf("retp\n");
+                				}
+                				if((ast.right.value.equals("function")) && !computing) {
+                					System.out.printf("retf\n");
+                    				}
                 			}
-                			if(ast.right.value.equals("function")) {
-                    			System.out.printf("retf\n");
-                    			}
+                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                			
+                			FunctionNum++;
+                			lastProg=temp;
+                			computing = tempComputing;
+                        	LAB =tempLAB;
+                        	SWITCH_LABEL=tempSWITCH_LABEL;
+                            should_increment=tempshould_increment;
+                            SSP=tempSSP;
+                            sizeOfParameters=tempsizeOfParameters;
+                            
+                            SEP = tempSEP;
+                            MAX_SEP =tempMAX_SEP;
                 		}
-                		FunctionNum++;
-                		lastProg=temp;
+                		else
+                		{
+                			
+                			if(ast.right.right!=null&& ast.right.right.right!=null)
+                			{
+                				if(!computing)
+                				{
+                					System.out.printf("%s_begin:\n",ast.right.left.left.left.value.toUpperCase());
+                				}
+                				code(ast.right.right.right,symbolTable);
+                				if(ast.right.value.equals("procedure") && !computing) {
+                					System.out.printf("retp\n");
+                				}
+                				if(ast.right.value.equals("function")&& !computing) {
+                					System.out.printf("retf\n");
+                    				}
+                			}	
+                		}
                 	}
                 }
                 
@@ -416,136 +551,274 @@ public class homework3 {
                         {                                  
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.printf("add\n");
+                                     if(!computing)
+                                     {
+                                    	 System.out.printf("add\n");
+                                     }
+                                     else
+                                     {
+                                     	SEP--;
+                                     }
                         }
                                      
                         if(ast.value .equals( "multiply"))
                         {
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.printf("mul\n");
+                                     if(!computing)
+                                     {
+                                    	 System.out.printf("mul\n");
+                                     }
+                                     else
+                                     {
+                                     	SEP--;
+                                     }
                         }
                         
                         if(ast.value.equals( "divide"))
                         {
                                      coder(ast.left,symbols);
                                      coder(ast.right,symbols);
-                                     System.out.printf("div\n");
+                                     if(!computing)
+                                     {
+                                    	 System.out.printf("div\n");
+                                     }
+                                     else
+                                     {
+                                     	SEP--;
+                                     }
                         }
                         
                         if(ast.value.equals( "negative") && ast.right == null ) // or ast.right.vaule=="-1"
                         {
                                      coder(ast.left,symbols);
-                                     System.out.printf("neg\n");
+                                     if(!computing)
+                                     {
+                                    	 System.out.printf("neg\n");
+                                     }
                         }
                         
                         if(ast.value.equals( "minus"))
                         {
                                    coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.printf("sub\n");
+                                    if(!computing)
+                                    {
+                                    	System.out.printf("sub\n");
+                                    }
+                                    else
+                                    {
+                                    	SEP--;
+                                    }
                         }
                         
                         if(ast.value.equals( "equals"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.printf("equ\n");
+                                    if(!computing)
+                                    {
+                                    	System.out.printf("equ\n");
+                                    }
+                                    else
+                                    {
+                                    	SEP--;
+                                    }
                         }
                         
                         if(ast.value.equals( "notEquals"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                   System.out.printf("neq\n");
+                                    if(!computing)
+                                   {
+                                    	System.out.printf("neq\n");
+                                   }
+                                   else
+                                   {
+                                   	SEP--;
+                                   }
                         }
                         
                         if(ast.value.equals( "and"))
                         {
                                     coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.printf("and\n");
+                                    if(!computing)
+                                    {
+                                    	System.out.printf("and\n");
+                                    }
+                                    else
+                                    {
+                                    	SEP--;
+                                    }
                         }
                         
                         if(ast.value.equals( "or"))
                         {
                                    coder(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.printf("or\n");
+                                    if(!computing)
+                                    {
+                                    	System.out.printf("or\n");
+                                    }
+                                    else
+                                    {
+                                    	SEP--;
+                                    }
                         }
                         
                         if(ast.value .equals( "false")) {
-                                                           System.out.print("ldc 0\n");
+                        	if(!computing)
+                        	{
+                        		System.out.print("ldc 0\n");
+                        	}
+                        	else {
+                        		SEP++;
+                        		if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                        	}
                         }
                         
                         if(ast.value .equals( "true")) {
-                                                           System.out.print("ldc 1\n");
+                        	if(!computing)
+                        	{
+                        		System.out.print("ldc 1\n");
+                        	}
+                        	else {
+                        		SEP++;
+                        		if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                        	}
                         }
                         
                         if(ast.value .equals( "lessThan")) {
                                                     coder(ast.left,symbols);
                                                    coder(ast.right,symbols);
-                                                    System.out.printf("les\n");
+                                                   if(!computing)
+                                                    {
+                                                	   System.out.printf("les\n");
+                                                    }
+                                                    else
+                                                    {
+                                                    	SEP--;
+                                                    }
                         }
                         
                         if(ast.value .equals( "lessOrEquals")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.printf("leq\n");
+                            if(!computing)
+                            {
+                            	System.out.printf("leq\n");
+                            }
+                            else
+                            {
+                            	SEP--;
+                            }
                         }
                        
                         if(ast.value .equals( "greaterOrEquals")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.printf("geq\n");
+                            if(!computing)
+                            {
+                            	System.out.printf("geq\n");
+                            }
+                            else
+                            {
+                            	SEP--;
+                            }
                         }
                         
                         if(ast.value .equals( "greaterThan")) {
                             coder(ast.left,symbols);
                             coder(ast.right,symbols);
-                            System.out.printf("grt\n");
+                            if(!computing)
+                            {
+                            	System.out.printf("grt\n");
+                            }
+                            else
+                            {
+                            	SEP--;
+                            }
                         }
                              
                         if(ast.value .equals( "constReal" ))
                          {
-                                    System.out.printf("ldc %f\n" , Float.valueOf(ast.left.value)); // "value" is a string but we want to print out a number, possible bug
+                        	if(!computing)
+                        	{
+                        		System.out.printf("ldc %f\n" , Float.valueOf(ast.left.value)); // "value" is a string but we want to print out a number, possible bug
+                        	}
+                        	else
+                        	{
+                        		SEP++;
+                        		if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                        	}
                          }
                         
                         if(ast.value .equals( "constBool")) {
+                        	if(!computing) {
                                    if(ast.left.value .equals( "true"))
                                                System.out.printf("ldc 1\n"); //if true ldc 1 else ldc 0
                                    if(ast.left.value .equals( "false"))
                                                System.out.printf("ldc 0\n");
+                        	}
+                        	else
+                        		SEP++;
+                        	if(SEP>MAX_SEP)
+                    			MAX_SEP = SEP;
                         }
                    
                         
                         if(ast.value .equals( "not" ))
                         {
-                                                  coder(ast.left,symbols);
-                                   System.out.printf("not\n" , ast.left.value); 
+                                   coder(ast.left,symbols);
+                                   if(!computing)
+                                   {
+                                	   System.out.printf("not\n" , ast.left.value); 
+                                   }
                         }
                         
                         if(ast.value .equals( "constInt")) {
-                            System.out.printf("ldc %d\n" , (Integer.parseInt(ast.left.value))); // "value" is a string but we want to print out a number
+                            if(!computing)
+                        	{
+                            	System.out.printf("ldc %d\n" , (Integer.parseInt(ast.left.value))); // "value" is a string but we want to print out a number
+                        	}
+                            else {
+                            	SEP++;
+                            	if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                            }
                         }
                         
                         if(ast.value .equals( "identifier"))
                         { 
-                                    codel(ast,symbols);
-                                    System.out.printf("ind\n");
+                        	codel(ast,symbols);
+                            if(!computing)
+                        	{
+                            	System.out.printf("ind\n");
+                        	}
                         }
                         
                         if(ast.value.equals("record"))
                         {
-                                   codel(ast,symbols);
-                            System.out.printf("ind\n");
+                            codel(ast,symbols);
+                            if(!computing)
+                            {
+                            	System.out.printf("ind\n");
+                            }
 
 
                         }
                     if(ast.value.equals("array"))
                     {
                         codel(ast,symbols);
-                        System.out.printf("ind\n");
+                        if(!computing)
+                        {
+                        	System.out.printf("ind\n");
+                        }
 
 
                     }
@@ -553,12 +826,29 @@ public class homework3 {
                     {
 
                     	
-                    	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
-                    	
-                    	System.out.printf("mst %d\n",mstVal);
+                    	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value.toUpperCase()).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
+                    	if(!computing)
+                    	{
+                    		System.out.printf("mst %d\n",mstVal);
+                    	}
+                    	else
+                    	{
+                    		SEP++;
+                    		SEP+=symbols.hashtable.get(ast.left.left.value.toUpperCase()).SEP;
+                    		if(SEP>MAX_SEP)
+                    			MAX_SEP = SEP;
+                    	}
                     	 sendArgs(ast.right,symbols);
-                    	 int numOfArgs = symbols.hashtable.get(ast.left.left.value).size-5;
-                    	System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value);
+                    	 int numOfArgs = symbols.hashtable.get(ast.left.left.value.toUpperCase()).size-5;
+                    	 if(!computing)
+                    	 {
+                    		 System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value.toUpperCase());
+                    	 }
+                    	 else {
+                    		 SEP++;
+                    		 if(SEP>MAX_SEP)
+                     			MAX_SEP = SEP;
+                    	 }
                     }
                         
                 }
@@ -567,27 +857,60 @@ public class homework3 {
                 {
                         if(ast.value .equals( "identifier" ))
                          {                                 
-                            System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(ast.left.value).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(ast.left.value).addr); 
+                            if(!computing)
+                        	{
+                            	String first =ast.left.value;
+                            	String second = ast.left.value;
+                            	if(!SymbolTable.hashtable.containsKey(first))
+                            	{
+                            		first = first.toUpperCase();
+                            	}
+                            	if(!SymbolTable.hashtable.containsKey(second))
+                            	{
+                            		second = second.toUpperCase();
+                            	}
+                            	
+                            	System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(first).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(second).addr); 
+                        	}
+                            else {
+                            	SEP++;
+                            	if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                            }
                          }
                         if(ast.value .equals( "pointer" ))
                         {                                  
                            if(ast.left.value.equals("identifier"))
                                    {
-                                      System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(ast.left.left.value).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(ast.left.left.value).addr); 
-                               	   System.out.printf("ind\n");
+                                      	if(!computing)
+                        	   			{
+                                      		System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(ast.left.left.value).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(ast.left.left.value).addr); 
+                        	   		  	  	System.out.printf("ind\n");
+                        	   			}
+                                      	else {
+                                      		SEP++;
+                                      		if(SEP>MAX_SEP)
+                                    			MAX_SEP = SEP;
+                                      	}
 
                                    }
                            else if(ast.left.value.equals("pointer"))
                            {
                                codel(ast.left,symbols);
 
-                        	   System.out.printf("ind\n");
+                        	   if(!computing)
+                        	   {
+                        		   	System.out.printf("ind\n");
+                        	   }
                            }
                            else
                            {
                                        // if(symbols.hashtable.contains(ast.left.value))
                                codel(ast.left,symbols);
-                        	   System.out.printf("ind\n");
+                        	   if(!computing)
+                               {
+                        		   System.out.printf("ind\n");
+                               }
 
                                // System.out.printf("ldc %d\n",SymbolTable.hashtable.get(ast.left.value).addr);
    
@@ -601,7 +924,10 @@ public class homework3 {
                                    if(ast.left.value.equals("record")) 
                                    {
                                                codel(ast.left,symbols);
-                                System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                               if(!computing)
+                                               {
+                                            	   System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                               }
      
                                    }
                                    else
@@ -609,8 +935,10 @@ public class homework3 {
 
                                                codel(ast.left,symbols); 
                                               
-
-                                               System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                               if(!computing)
+                                               {
+                                            	   System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                               }
                                    }
                         }
                         if(ast.value.equals("array"))
@@ -627,7 +955,10 @@ public class homework3 {
 
 
                                    indexToAddress(ast.right,symbols,var,dim);
-                                   System.out.printf("dec %d\n",var.subPart );
+                                   if(!computing)
+                                   {
+                                	   System.out.printf("dec %d\n",var.subPart );
+                                   }
 
 
 
@@ -649,8 +980,13 @@ public class homework3 {
                             sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
 
                         }
-
-                        System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
+                        if(!computing)
+                        {
+                        	System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
+                        }
+                        else {
+                     	   SEP--;
+                        }
                         dim[0]++;
                         return;
                     }
@@ -664,7 +1000,13 @@ public class homework3 {
                             sum = sum * (var.dim[1][i] - var.dim[0][i] + 1);
                             //System.out.printf("when dim is:%d , sum is: %d\n",dim, sum);
                         }
-                        System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
+                       if(!computing)
+                        {
+                    	   System.out.printf("ixa %d\n", sum*var.sizeOfSlot);
+                        }
+                       else {
+                    	   SEP--;
+                       }
                         dim[0]++;
 
                     }
@@ -721,7 +1063,15 @@ public class homework3 {
                         {
                                     codel(ast.left,symbols);
                                     coder(ast.right,symbols);
-                                    System.out.printf("sto\n");
+                                    if(!computing) 
+                                    {
+                                    	System.out.printf("sto\n");
+                                    }
+                                    else
+                                    {
+                                    	SEP=SEP-2;
+                                   	}
+                                    
                         }               
                               
                         
@@ -736,7 +1086,14 @@ public class homework3 {
                         
                         if(ast.value .equals( "print")) {
                                                coder(ast.left,symbols);
-                                               System.out.printf("print\n");
+                                               if(!computing) 
+                                               {
+                                                   System.out.printf("print\n");
+                                               }
+                                               else
+                                               	{
+                                            	   SEP=SEP-1;
+                                               	}
                         }
 
                         if(ast.value .equals( "if") )
@@ -748,18 +1105,37 @@ public class homework3 {
                                                            int la=LAB++; int lb=LAB++;
                                                            
                                                            coder(ast.left,symbols);
-                                                           System.out.printf("fjp L%d\n",la);
+                                                           if(!computing) 
+                                                           {
+                                                               System.out.printf("fjp L%d\n",la);
+                                                           }
+                                                           else
+                                                           	{
+                                                        	   SEP=SEP-1;
+                                                           	}
                                                            code(ast.right,symbols);
-                                                           
-                                                           System.out.printf("L%d:\n",lb);
+                                                           if(!computing) 
+                                                           {
+                                                               System.out.printf("L%d:\n",lb);
+                                                           }
                                                }
                                                else
                                                {
                                                            int la=LAB++;
-                                   coder(ast.left,symbols);
-                                   System.out.printf("fjp L%d\n",la);
-                                   code(ast.right,symbols);
-                                   System.out.printf("L%d:\n",la);
+                                                           coder(ast.left,symbols);
+                                                           if(!computing) 
+                                                           {
+                                                               System.out.printf("fjp L%d\n",la);
+                                                           }
+                                                           else
+                                                           	{
+                                                        	   SEP=SEP-1;
+                                                           	}
+                                                           code(ast.right,symbols);
+                                                           if(!computing) 
+                                                           {
+                                                               System.out.printf("L%d:\n",la);
+                                                           }
                                                            
                                                }
                                                
@@ -768,56 +1144,110 @@ public class homework3 {
                                    {
                                                int la=LAB++;
                                    coder(ast.left,symbols);
-                                   System.out.printf("fjp L%d\n",la);
-                                   System.out.printf("L%d:\n",la);   
+                                   if(!computing) 
+                                   {
+                                       System.out.printf("fjp L%d\n",la);
+                                   }
+                                   else
+                                   	{
+                                	   SEP=SEP-1;
+                                   	}
+                                   if(!computing) 
+                                   {
+                                       System.out.printf("L%d:\n",la);
+                                   }
                                    }
                         }
                         if(ast.value .equals( "else") )
                         {
                                    int la=LAB-2; int lb=LAB-1;
                                    code(ast.left,symbols);
-                                   System.out.printf("ujp L%d\n",lb);
-                                   System.out.printf("L%d:\n",la);
+                                   if(!computing) 
+                                   {
+                                       System.out.printf("ujp L%d\n",lb);
+                                       System.out.printf("L%d:\n",la);
+
+                                   }
                                    code(ast.right,symbols);
                         }
                         if(ast.value .equals( "while") )
                         {
                                    int la=LAB++; int lb=LAB++; last_while=lb;
-                                   System.out.printf("L%d:\n",la);
+                                   if(!computing)
+                                   {
+                                	   System.out.printf("L%d:\n",la);
+                                   }
                                    coder(ast.left,symbols);
-                                   System.out.printf("fjp L%d\n",lb);
+                                   if(!computing)
+                                   {
+                                	   System.out.printf("fjp L%d\n",lb);
+                                   }
+                                   else {
+                                	   SEP--;
+                                   }
                                    code(ast.right,symbols);
-                                   System.out.printf("ujp L%d\n",la);
-                                   System.out.printf("L%d:\n",lb);
+                                   if(!computing)
+                                   {
+                                	   System.out.printf("ujp L%d\n",la);
+                                       System.out.printf("L%d:\n",lb);
+                                   }
                         }
                         if(ast.value.equals("switch"))
                         {
                                    int la = LAB++;
                                    coder(ast.left,symbols);
-                            System.out.printf("neg\n");
-                            System.out.printf("ixj switch_end_%d\n",la);
+                            if(!computing)       
+                            {
+                            	System.out.printf("neg\n");
+                            	System.out.printf("ixj switch_end_%d\n",la);
+                            }
+                            else {
+                            	SEP--;
+                            }
                             codec(ast.right,la,symbols);
-                            print_labels(ast.right,la);
-                            
-                            System.out.printf("switch_end_%d:\n",la);
+                            if(!computing)
+                            {
+                            	print_labels(ast.right,la);
+                                System.out.printf("switch_end_%d:\n",la);
 
-                            
-
+                            }
+                           
                         }
                         
                         if(ast.value.equals("break"))
                         {
-                                   System.out.printf("ujp L%d\n",last_while);
+                            if(!computing)      
+                        	{
+                            	System.out.printf("ujp L%d\n",last_while);
+                        	}
+                            
                         }
                         if(ast.value.equals("call"))
                         {
                         	
-                        	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
-                        	
-                        	System.out.printf("mst %d\n",mstVal);
+                        	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value.toUpperCase()).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
+                        	if(!computing)
+                        	{
+                        		System.out.printf("mst %d\n",mstVal);
+                        	}
+                        	else {
+                        		SEP++;
+                        		SEP+=symbols.hashtable.get(ast.left.left.value.toUpperCase()).SEP;
+                        		if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                        	}
                         	sendArgs(ast.right,symbols);
-                        	int numOfArgs = symbols.hashtable.get(ast.left.left.value).size-5;
-                        	System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value);
+                        	int numOfArgs = symbols.hashtable.get(ast.left.left.value.toUpperCase()).size-5;
+                        	if(!computing)
+                        	{
+                        		System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value);
+                        	}
+                        	else
+                        	{
+                        		SEP++;
+                        		if(SEP>MAX_SEP)
+                        			MAX_SEP = SEP;
+                        	}
                         }
                         
                        return;
@@ -836,7 +1266,14 @@ public class homework3 {
                 		codel(ast.right,symbols);
                 	if(((symbols.hashtable.get(ast.right.left.value)).type).equals("array"))
                 	{
-                		System.out.printf("movs %d \n",((symbols.hashtable.get(ast.right.left.value)).size));
+                		if(!computing)
+                		{
+                			System.out.printf("movs %d \n",((symbols.hashtable.get(ast.right.left.value)).size));
+                		}
+                		else {
+                			SEP--;
+                			SEP = SEP + symbols.hashtable.get(ast.right.left.value).size;
+                		}
                 	}
                 	}
                 	else
@@ -858,10 +1295,15 @@ public class homework3 {
                              codec(ast.left,label,symbols);
                                    
                          }
-
-                        System.out.printf("case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                        if(!computing)
+                        {
+                        	System.out.printf("case_%d_%d:\n",label,Integer.parseInt(ast.right.left.left.value));
+                        }
                         code(ast.right.right,symbols);
-                        System.out.printf("ujp switch_end_%d\n",label);
+                        if(!computing)
+                        {
+                        	System.out.printf("ujp switch_end_%d\n",label);
+                        }
   
 
                         }

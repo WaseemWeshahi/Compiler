@@ -1,5 +1,6 @@
 A:
 ssp 7
+sep 2
 ujp A_begin
 A_begin:
 lda 0 5
