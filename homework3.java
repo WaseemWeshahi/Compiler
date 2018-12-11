@@ -448,6 +448,9 @@ public class homework3 {
                 		System.out.printf("sep %d\n",symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SEP);
         				System.out.printf("ujp %s_begin\n",ast.right.left.left.left.value);
                 	}
+                	if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
+            			ADR=5;
+            			symbolTable.generateSymbolTable(ast.right);}
         			if(ast.left!=null)
                 	{
                 		makeFunctions(ast.left,symbolTable,parent,parentName);
@@ -456,9 +459,9 @@ public class homework3 {
                 	{
                 		String temp = lastProg;
                 		lastProg = ast.right.left.left.left.value.toUpperCase();
-                		if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
+                		/*if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
                 			ADR=5;
-                			symbolTable.generateSymbolTable(ast.right);}
+                			symbolTable.generateSymbolTable(ast.right);}*/
                 		if(symbolTable.hashtable.get(lastProg).SEP==-1)
                 		{	
                 			
