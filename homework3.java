@@ -272,6 +272,8 @@ public class homework3 {
             	
             	generateSymbolTable(tree.right);
             	hashtable2.get(tree.left.left.value.toUpperCase()).get(0).SSP=ADR;
+            	hashtable2.get(tree.left.left.value.toUpperCase()).get(0).SEP=-1;
+
             	lastProg = temp;
             }
             if(tree.value.equals("inOutParameters"))
@@ -621,7 +623,6 @@ public class homework3 {
                     				}
                 			}
                 			symbolTable.hashtable2.get(lastProg).get(0).SEP=MAX_SEP;
-                			
                 			FunctionNum++;
                 			lastProg=temp;
                 			computing = tempComputing;
