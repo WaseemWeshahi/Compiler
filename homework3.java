@@ -7,6 +7,7 @@
 */
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.*; 
 
 
 public class homework3 {
@@ -25,9 +26,10 @@ public class homework3 {
             static boolean computing=false;
             static int SEP = 0;
             static int MAX_SEP =0;
+            static int parameterList=0;
             
             
-
+            	
                 // Abstract Syntax Tree
                 static final class AST {
                     public final String value;
@@ -104,7 +106,8 @@ public class homework3 {
 
     static final class SymbolTable {
         // Think! what does a SymbolTable contain?
-        public static HashMap<String, Variable> hashtable;
+        public static HashMap<String, List<Variable>> hashtable2;
+
 
         public static int getArrayDimension(AST tree) {    // Calcualtes number of Dimensions
             if (tree == null)
@@ -129,11 +132,12 @@ public class homework3 {
             fillArrayDimension(tree.right,index,arr);
 
         }
-        public SymbolTable(HashMap<String,Variable> hash) {
-            hashtable = hash;
+        public SymbolTable(HashMap<String,List<Variable>> hash) {
+            hashtable2 = hash;
         }
         public SymbolTable() {
-            hashtable = new HashMap<String,Variable>();
+            hashtable2 = new HashMap<String,List<Variable>>();
+
         }
 
 
@@ -147,6 +151,11 @@ public class homework3 {
                 {
                 	System.out.printf("%s:\n",tree.left.left.left.value.toUpperCase());
                 	lastProg = tree.left.left.left.value.toUpperCase();
+                	Variable var = new Variable();
+                	var.funcSequence=FunctionNum;
+                	List<Variable> list = new ArrayList<>();
+            		list.add(var);
+                	hashtable2.put(lastProg,list);
                 	
                 	
    
@@ -177,6 +186,8 @@ public class homework3 {
             }
             if(tree.value.equals("scope")) {
             	 int temp = SSP;
+             	
+
             	if(tree.left!= null)
                 {
                    
@@ -186,11 +197,23 @@ public class homework3 {
                 	
                     
                 }
-            	System.out.printf("SSP %d \n",SSP);
+            	if(!computing)
+            	{
+            		System.out.printf("SSP %d \n",ADR);
+            	}
+            	
             	
             	String type = "void";
             	Variable var = new Variable(type,0,global_offset,"1   ",SSP,FunctionNum);
-            	hashtable.put(lastProg, var);
+            	
+            	
+            	hashtable2.get(lastProg.toUpperCase()).get(0).type=type;
+            	hashtable2.get(lastProg.toUpperCase()).get(0).SSP=ADR;
+                hashtable2.get(lastProg.toUpperCase()).get(0).addr=var.addr;
+                //hashtable2.get(lastProg.toUpperCase()).get(0).size=0;
+
+
+
             	FunctionNum++;
             	SSP=temp;
                 return null;
@@ -204,16 +227,30 @@ public class homework3 {
                 if(tree.right!=null)
                 {
                     generateSymbolTable(tree.right);
-                    SSP+=hashtable.get(tree.right.left.left.value).size;
+                    
+                    Variable var = hashtable2.get(lastProg.toUpperCase()).get(0);
+                    if(hashtable2.containsKey(tree.right.left.left.value)) {
+
+                    for(int i=0;i<hashtable2.get(tree.right.left.left.value).size();i++)
+                    {
+                    	if (hashtable2.get(tree.right.left.left.value).get(i).funcSequence==hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                    		 var =hashtable2.get(tree.right.left.left.value).get(i);
+                    	 }	
+                    }
+                    
+                    //SSP+=var.size;
+                    }
                 }
             }
             
             if(tree.value.equals( "procedure" )|| tree.value.equals("function")) {
                 
             	
+            	
             	if(tree.left!=null)
                 {
                     generateSymbolTable(tree.left);
+                    generateSymbolTable(tree.right);
                 }
             	
             	
@@ -226,8 +263,15 @@ public class homework3 {
             		System.out.printf("%s:\n",tree.left.left.value.toUpperCase());
             	}
             	lastProg = tree.left.left.value.toUpperCase();
+            	Variable var = new Variable();
+            	var.funcSequence=FunctionNum;
+            	//var.size=ADR-4;
+            	List<Variable> list = new ArrayList<>();
+        		list.add(var);
+            	hashtable2.put(lastProg,list);
+            	
             	generateSymbolTable(tree.right);
-            	hashtable.get(tree.left.left.value.toUpperCase()).SSP=SSP;
+            	hashtable2.get(tree.left.left.value.toUpperCase()).get(0).SSP=ADR;
             	lastProg = temp;
             }
             if(tree.value.equals("inOutParameters"))
@@ -242,7 +286,13 @@ public class homework3 {
             		type = "void";
             	
             	Variable var = new Variable(type,0,global_offset,"1   ",SSP,FunctionNum); //making a new variable instance, tree.right holds the variable's type
-                hashtable.put(lastProg,var); //tree.left.left has the variable name	
+                
+                
+                hashtable2.get(lastProg.toUpperCase()).get(0).type=var.type;
+                hashtable2.get(lastProg.toUpperCase()).get(0).SSP=ADR;
+                hashtable2.get(lastProg.toUpperCase()).get(0).size=ADR-5;
+                hashtable2.get(lastProg.toUpperCase()).get(0).addr=var.addr;
+                
             	
             	
             }
@@ -273,15 +323,36 @@ public class homework3 {
                 {
                     String pointsTo = "1";
                     if(tree.right.left.value.equals("identifier"))
-                    {Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value,1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
-                        hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
-                        ADR++; }
+                    {
+                    	Variable var = new Variable(tree.right.value,ADR,global_offset,tree.right.left.left.value,1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
+                        if(!hashtable2.containsKey(tree.left.left.value))
+                    	{
+                        	List<Variable> list = new ArrayList<>();
+                    		list.add(var);
+                    		hashtable2.put(tree.left.left.value, list);
+                		}
+                        else {
+                        	hashtable2.get(tree.left.left.value).add(var);
+                        }
+                        ADR++;
+                        
+                    }
                     else
                     {
                         Variable var = new Variable(tree.right.left.value,ADR,global_offset,tree.right.left.value,1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
-                        hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+
+                        if(!hashtable2.containsKey(tree.left.left.value))
+                    	{
+                    		List<Variable> list = new ArrayList<>();
+                    		list.add(var);
+                    		hashtable2.put(tree.left.left.value, list);
+                		}
+                        else {
+                        	hashtable2.get(tree.left.left.value).add(var);
+                        }
                         ADR++;
                     }
+                    SSP+=1;
                 }
 
 //TO-DO:: (maybe) take care of gloab addr and bla bla bla
@@ -299,7 +370,16 @@ public class homework3 {
                     should_increment=0;
                     global_offset=temp2;
                    var.size=update_size(tree.right.left);
-                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+                   SSP+=var.size;
+                    if(!hashtable2.containsKey(tree.left.left.value))
+                	{
+                		List<Variable> list = new ArrayList<>();
+                		list.add(var);
+                		hashtable2.put(tree.left.left.value, list);
+            		}
+                    else {
+                    	hashtable2.get(tree.left.left.value).add(var);
+                    }
                 }
                 else if(tree.right.value.equals("array"))
                 {
@@ -313,7 +393,13 @@ public class homework3 {
                     if(tree.right.right.value.equals("identifier"))
                     {
                        // arrayType = tree.right.right.right.value;
-                        sizeOfSlot=SymbolTable.hashtable.get(tree.right.right.left.value).size;
+                        for(int ind=0;ind<hashtable2.get(tree.right.right.left.value).size();ind++)
+                        {
+                        	 if (hashtable2.get(tree.right.right.left.value).get(ind).funcSequence==hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                        		 sizeOfSlot =hashtable2.get(tree.right.right.left.value).get(ind).size;
+                        	 }	
+                        }
+                        
                     }
 
                     for(i=0;i<dims;i++) {// Calculate SubPart
@@ -331,8 +417,17 @@ public class homework3 {
                     if(tree.right.right.value.equals("identifier"))
                         type=tree.right.right.left.value;
                     Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type,FunctionNum);
-                    hashtable.put(tree.left.left.value,var);
+                    if(!hashtable2.containsKey(tree.left.left.value))
+                	{
+                		List<Variable> list = new ArrayList<>();
+                		list.add(var);
+                		hashtable2.put(tree.left.left.value, list);
+            		}
+                    else {
+                    	hashtable2.get(tree.left.left.value).add(var);
+                    }
                     ADR=ADR+arraysize;
+                    SSP+=arraysize;
 
 
 
@@ -341,8 +436,21 @@ public class homework3 {
                 else
                 {
                     Variable var = new Variable(tree.right.value,ADR,global_offset,"1   ",1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
-                    hashtable.put(tree.left.left.value,var); //tree.left.left has the variable name
+            		
+
+                    if(!hashtable2.containsKey(tree.left.left.value))
+                	{
+                		
+
+                    	List<Variable> list = new ArrayList<>();
+                		list.add(var);
+                		hashtable2.put(tree.left.left.value, list);
+            		}
+                    else {
+                    	hashtable2.get(tree.left.left.value).add(var);
+                    }
                     ADR++;
+                    SSP+=1;
                 }
 
 
@@ -352,7 +460,14 @@ public class homework3 {
             	allowedToEnter=true;
             	generateSymbolTable(tree);
             	allowedToEnter=false;
-            	SSP+=hashtable.get(tree.left.left.value).size;
+            	
+            	for(int i=0;i<hashtable2.get(tree.left.left.value).size();i++)
+                {
+                	 if (hashtable2.get(tree.left.left.value).get(i).funcSequence==hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                		// SSP= SSP+hashtable2.get(tree.left.left.value).get(i).size;
+                		 hashtable2.get(lastProg).get(0).size=hashtable2.get(lastProg).get(0).size+hashtable2.get(tree.left.left.value).get(i).size;
+                	 }	
+                }
 
             }
             return null;
@@ -367,7 +482,6 @@ public class homework3 {
                         if(ast.left.right!=null)
                         {
                         	computing=true;
-                        	makeFunctions(ast.left.right,symbolTable,ast,lastProg);
                         	int tempLAB=LAB;
                         	int tempSWITCH_LABEL=SWITCH_LABEL;
                         	int tempshould_increment=should_increment;
@@ -379,11 +493,13 @@ public class homework3 {
                         	int tempMAX_SEP=MAX_SEP;
                         	SEP=0;
                         	MAX_SEP=0;
+                        	makeFunctions(ast.left.right,symbolTable,ast,lastProg);
+
                 			code(ast,symbolTable);	
                 			
                 			
                 			System.out.printf("sep %d \n",MAX_SEP);
-                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                			symbolTable.hashtable2.get(lastProg).get(0).SEP=MAX_SEP;
                         	
                         	computing = false;
                         	LAB =tempLAB;
@@ -417,7 +533,7 @@ public class homework3 {
                 			code(ast,symbolTable);	
                 			
                 			System.out.printf("sep %d \n",MAX_SEP);
-                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                			symbolTable.hashtable2.get(lastProg).get(0).SEP=MAX_SEP;
                         	System.out.printf("ujp %s_begin \n",lastProg);
                         	computing = false;
                         	LAB =tempLAB;
@@ -441,19 +557,26 @@ public class homework3 {
                 }
                 private static void makeFunctions(AST ast,SymbolTable symbolTable,AST parent,String parentName)
                 {
-                	if(!computing && symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SEP!=-1 )
+                	if(!computing && symbolTable.hashtable2.get(ast.right.left.left.left.value.toUpperCase()).get(0).SEP!=-1 )
                 	{
                 		System.out.printf("%s:\n", ast.right.left.left.left.value.toUpperCase());
-                		System.out.printf("ssp %d\n",symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SSP);
-                		System.out.printf("sep %d\n",symbolTable.hashtable.get(ast.right.left.left.left.value.toUpperCase()).SEP);
+                		System.out.printf("ssp %d\n",symbolTable.hashtable2.get(ast.right.left.left.left.value.toUpperCase()).get(0).SSP);
+                		System.out.printf("sep %d\n",symbolTable.hashtable2.get(ast.right.left.left.left.value.toUpperCase()).get(0).SEP);
         				System.out.printf("ujp %s_begin\n",ast.right.left.left.left.value);
                 	}
-                	if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
-            			ADR=5;
-            			symbolTable.generateSymbolTable(ast.right);}
-        			if(ast.left!=null)
+                	if(!symbolTable.hashtable2.containsKey(ast.right.left.left.left.value.toUpperCase())) {
+                		
+                		ADR=5;
+                		String temp=lastProg;
+                		lastProg=ast.right.left.left.left.value.toUpperCase();
+                		SSP=5;
+            			symbolTable.generateSymbolTable(ast.right);
+            			lastProg=temp;
+                	}
+        			if(ast.right.right.left!=null)
                 	{
-                		makeFunctions(ast.left,symbolTable,parent,parentName);
+                		if(ast.right.right.left.right!=null) {
+        				makeFunctions(ast.right.right.left.right,symbolTable,parent,parentName);}
                 	}
                 	if(ast.right!=null)
                 	{
@@ -462,7 +585,7 @@ public class homework3 {
                 		/*if(!symbolTable.hashtable.containsKey(ast.right.left.left.left.value.toUpperCase())) {
                 			ADR=5;
                 			symbolTable.generateSymbolTable(ast.right);}*/
-                		if(symbolTable.hashtable.get(lastProg).SEP==-1)
+                		if(symbolTable.hashtable2.get(lastProg).get(0).SEP==-1)
                 		{	
                 			
                     		
@@ -497,7 +620,7 @@ public class homework3 {
                 					System.out.printf("retf\n");
                     				}
                 			}
-                			symbolTable.hashtable.get(lastProg).SEP=MAX_SEP;
+                			symbolTable.hashtable2.get(lastProg).get(0).SEP=MAX_SEP;
                 			
                 			FunctionNum++;
                 			lastProg=temp;
@@ -530,6 +653,7 @@ public class homework3 {
                 			}	
                 		}
                 	}
+
                 }
                 
                 private static int update_size(AST ast)
@@ -543,7 +667,13 @@ public class homework3 {
                 	}
                 	else if(ast.value.equals("var"))
                 	{
-                		return SymbolTable.hashtable.get(ast.left.left.value).size;
+                		for(int i=0;i<SymbolTable.hashtable2.get(ast.left.left.value).size();i++)
+                        {
+                        	 if (SymbolTable.hashtable2.get(ast.left.left.value).get(i).funcSequence==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                        		 return SymbolTable.hashtable2.get(ast.left.left.value).get(i).size;
+                        	 }	
+                        }
+                		
                 	}
                 	return size;
                 }
@@ -828,8 +958,8 @@ public class homework3 {
                     if(ast.value.equals("call"))
                     {
 
-                    	
-                    	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value.toUpperCase()).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
+
+                    	int mstVal = Math.abs(symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).funcSequence-symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence-1) ;
                     	if(!computing)
                     	{
                     		System.out.printf("mst %d\n",mstVal);
@@ -837,12 +967,12 @@ public class homework3 {
                     	else
                     	{
                     		SEP++;
-                    		SEP+=symbols.hashtable.get(ast.left.left.value.toUpperCase()).SEP;
+                    		SEP+=symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).SEP;
                     		if(SEP>MAX_SEP)
                     			MAX_SEP = SEP;
                     	}
                     	 sendArgs(ast.right,symbols);
-                    	 int numOfArgs = symbols.hashtable.get(ast.left.left.value.toUpperCase()).size-5;
+                    	 int numOfArgs = symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).size;
                     	 if(!computing)
                     	 {
                     		 System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value.toUpperCase());
@@ -864,16 +994,42 @@ public class homework3 {
                         	{
                             	String first =ast.left.value;
                             	String second = ast.left.value;
-                            	if(!SymbolTable.hashtable.containsKey(first))
+                            	if(!symbols.hashtable2.containsKey(first))
                             	{
                             		first = first.toUpperCase();
                             	}
-                            	if(!SymbolTable.hashtable.containsKey(second))
+                            	if(!symbols.hashtable2.containsKey(second))
                             	{
                             		second = second.toUpperCase();
                             	}
                             	
-                            	System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(first).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(second).addr); 
+                            	Variable firstvar=new Variable();
+                            	Variable secondvar=new Variable();
+                            	boolean found=false;
+                            	int counter=0;
+                            	
+                            	while(!found) {
+                            	for(int i=0;i<symbols.hashtable2.get(first).size();i++)
+                                {
+                                	 if ((symbols.hashtable2.get(first).get(i).funcSequence-counter)==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                                		 firstvar = symbols.hashtable2.get(first).get(i);
+                                		 found=true;
+                                	 }	
+                                }
+                            	counter++;
+                            	}
+                            	found=false;counter=0;
+                            	while(!found) {
+                            	for(int i=0;i<symbols.hashtable2.get(second).size();i++)
+                                {
+                                	 if (symbols.hashtable2.get(second).get(i).funcSequence-counter==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                                		 secondvar =symbols.hashtable2.get(second).get(i);
+                                		 found = true;
+                                	 }	
+                                }
+                            	counter++;}
+                            	
+                            	System.out.printf("lda %d %d\n",(firstvar.funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence),secondvar.addr); 
                         	}
                             else {
                             	SEP++;
@@ -887,7 +1043,32 @@ public class homework3 {
                                    {
                                       	if(!computing)
                         	   			{
-                                      		System.out.printf("lda %d %d\n",(SymbolTable.hashtable.get(ast.left.left.value).funcSequence-SymbolTable.hashtable.get(lastProg).funcSequence),SymbolTable.hashtable.get(ast.left.left.value).addr); 
+                                      		Variable firstvar=new Variable();
+                                        	Variable secondvar=new Variable();
+                                        	boolean found=false;
+                                        	int counter=0;
+                                        	while(!found ) {
+                                        	for(int i=0;i<symbols.hashtable2.get(ast.left.left.value).size();i++)
+                                            {
+                                            	 if ((symbols.hashtable2.get(ast.left.left.value).get(i).funcSequence - counter )==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                                            		 firstvar =symbols.hashtable2.get(ast.left.left.value).get(i);
+                                            		 found=true;
+                                            	 }	
+                                            }
+                                        	counter++;
+                                        	}
+                                        	counter=0;found=false;
+                                        	while(!found) {
+                                        	for(int i=0;i<symbols.hashtable2.get(ast.left.left.value).size();i++)
+                                            {
+                                            	 if ((symbols.hashtable2.get(ast.left.left.value).get(i).funcSequence - counter)==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                                            		 secondvar =symbols.hashtable2.get(ast.left.left.value).get(i);
+                                            		 found = true;
+                                            	 }	
+                                            }
+                                        	counter++;
+                                        	}
+                                      		System.out.printf("lda %d %d\n",(firstvar.funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence),secondvar.addr); 
                         	   		  	  	System.out.printf("ind\n");
                         	   			}
                                       	else {
@@ -929,7 +1110,20 @@ public class homework3 {
                                                codel(ast.left,symbols);
                                                if(!computing)
                                                {
-                                            	   System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                            	   Variable firstvar=new Variable();
+                                               		boolean found=false;
+                                               		int counter=0;
+                                               		while(!found ) {
+                                               			for(int i=0;i<symbols.hashtable2.get(ast.right.left.value).size();i++)
+                                               			{
+                                               				if ((symbols.hashtable2.get(ast.right.left.value).get(i).funcSequence - counter )==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                                                   		    firstvar =SymbolTable.hashtable2.get(ast.right.left.value).get(i);
+                                                   		    found=true;
+                                               				}	
+                                               			}
+                                               			counter++;
+                                               		}
+                                            	   System.out.printf("inc %d\n",(firstvar.offset));
                                                }
      
                                    }
@@ -940,19 +1134,44 @@ public class homework3 {
                                               
                                                if(!computing)
                                                {
-                                            	   System.out.printf("inc %d\n",(SymbolTable.hashtable.get(ast.right.left.value).offset));
+                                            	   Variable firstvar=new Variable();
+                                              		boolean found=false;
+                                              		int counter=0;
+                                              		while(!found ) {
+                                              			for(int i=0;i<SymbolTable.hashtable2.get(ast.right.left.value).size();i++)
+                                              			{
+                                              				if ((SymbolTable.hashtable2.get(ast.right.left.value).get(i).funcSequence - counter )==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                                                  		    firstvar =SymbolTable.hashtable2.get(ast.right.left.value).get(i);
+                                                  		    found=true;
+                                              				}	
+                                              			}
+                                              			counter++;
+                                              		}
+                                            	   System.out.printf("inc %d\n",(firstvar.offset));
                                                }
                                    }
                         }
                         if(ast.value.equals("array"))
                         {
-                            Variable var;
+                            Variable var = new Variable();
                                     int[] dim=new int[1];
                                    
                                    codel(ast.left,symbols);
                                    
-                                   if(SymbolTable.hashtable.containsKey(ast.left.left.value) )
-                                       var=SymbolTable.hashtable.get(ast.left.left.value);
+                                   if(SymbolTable.hashtable2.containsKey(ast.left.left.value) ) {
+                                 		boolean found=false;
+                                 		int counter=0;
+                                 		while(!found ) {
+                                 			for(int i=0;i<SymbolTable.hashtable2.get(ast.left.left.value).size();i++)
+                                 			{
+                                 				if ((SymbolTable.hashtable2.get(ast.left.left.value).get(i).funcSequence - counter )==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                                     		    var =SymbolTable.hashtable2.get(ast.left.left.value).get(i);
+                                     		    found=true;
+                                 				}	
+                                 			}
+                                 			counter++;
+                                 		}
+                                   }
                                    else
                                        var=pointsTo(ast.left,symbols);
 
@@ -1020,10 +1239,50 @@ public class homework3 {
 
 
                     if (tree.value.equals("identifier")){
-                        return (SymbolTable.hashtable.get(SymbolTable.hashtable.get(tree.left.value).points2));}
+                    	Variable firstvar=new Variable();
+                    	Variable secondvar=new Variable();
+                    	boolean found=false;
+                    	int counter=0;
+                    	while(!found ) {
+                    	for(int i=0;i<SymbolTable.hashtable2.get(tree.left.value).size();i++)
+                        {
+                        	 if ((SymbolTable.hashtable2.get(tree.left.value).get(i).funcSequence - counter )==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                        		 firstvar =SymbolTable.hashtable2.get(tree.left.value).get(i);
+                        		 found=true;
+                        	 }	
+                        }
+                    	counter++;
+                    	}
+                    	counter=0;found=false;
+                    	while(!found) {
+                    	for(int i=0;i<SymbolTable.hashtable2.get(firstvar.points2).size();i++)
+                        {
+                        	 if ((SymbolTable.hashtable2.get(firstvar.points2).get(i).funcSequence - counter)==SymbolTable.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence) {
+                        		 secondvar =SymbolTable.hashtable2.get(firstvar.points2).get(i);
+                        		 found = true;
+                        	 }	
+                        }
+                    	counter++;
+                    	}
+                        return (secondvar);}
                     if(tree.value.equals("record")) {
                         if(tree.right.value.equals("identifier"))
-                            return (SymbolTable.hashtable.get(tree.right.left.value));
+                        {
+                        	Variable firstvar=new Variable();
+                        	boolean found=false;
+                        	int counter=0;
+                        	while(!found ) {
+                        	for(int i=0;i<symbols.hashtable2.get(tree.right.left.value).size();i++)
+                            {
+                            	 if ((symbols.hashtable2.get(tree.right.left.value).get(i).funcSequence - counter )==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                            		 firstvar =SymbolTable.hashtable2.get(tree.right.left.value).get(i);
+                            		 found=true;
+                            	 }	
+                            }
+                        	counter++;
+                        	}
+                        	return (firstvar);
+                        }
                         else
                             return pointsTo(tree.right,symbols);
                     //    Variable var=pointsTo(tree.right,symbols);
@@ -1038,14 +1297,27 @@ public class homework3 {
 
                    if(var.points2=="1")
                        return var;
+                
+                Variable firstvar=new Variable();
+               	boolean found=false;
+               	int counter=0;
+               	while(!found ) {
+               	for(int i=0;i<symbols.hashtable2.get(var.points2).size();i++)
+                   {
+                   	 if ((symbols.hashtable2.get(var.points2).get(i).funcSequence - counter )==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                   		 firstvar =symbols.hashtable2.get(var.points2).get(i);
+                   		 found=true;
+                   	 }	
+                   }
+               	counter++;
+               	}
 
-
-                   return (SymbolTable.hashtable.get(var.points2));
+                   return firstvar;
                 }
 
                 private static void code(AST ast,SymbolTable symbols)
                 {
-                        
+
                                    
                                    if(ast == null) {
                                                return;
@@ -1225,34 +1497,36 @@ public class homework3 {
                         	}
                             
                         }
+
                         if(ast.value.equals("call"))
                         {
                         	
-                        	int mstVal = Math.abs(symbols.hashtable.get(ast.left.left.value.toUpperCase()).funcSequence-symbols.hashtable.get(lastProg).funcSequence-1) ;
+                        	int mstVal = Math.abs(symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence-1) ;
                         	if(!computing)
                         	{
                         		System.out.printf("mst %d\n",mstVal);
                         	}
                         	else {
                         		SEP++;
-                        		SEP+=symbols.hashtable.get(ast.left.left.value.toUpperCase()).SEP;
+                        		SEP+=symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).SEP;
                         		if(SEP>MAX_SEP)
                         			MAX_SEP = SEP;
                         	}
                         	sendArgs(ast.right,symbols);
-                        	int numOfArgs = symbols.hashtable.get(ast.left.left.value.toUpperCase()).size-5;
+                        	int numOfArgs = symbols.hashtable2.get(ast.left.left.value.toUpperCase()).get(0).size;
                         	if(!computing)
                         	{
                         		System.out.printf("cup %d %s\n",numOfArgs,ast.left.left.value);
                         	}
                         	else
                         	{
+
                         		SEP++;
                         		if(SEP>MAX_SEP)
                         			MAX_SEP = SEP;
                         	}
                         }
-                        
+
                        return;
                 }
                 
@@ -1267,16 +1541,35 @@ public class homework3 {
                 	if(ast.right.value.equals("identifier")) 
                 	{
                 		codel(ast.right,symbols);
-                	if(((symbols.hashtable.get(ast.right.left.value)).type).equals("array"))
+                		
+                		Variable firstvar=new Variable();
+                   		boolean found=false;
+                   		int counter=0;
+                   		while(!found ) {
+                   			for(int i=0;i<symbols.hashtable2.get(ast.right.left.value).size();i++)
+                   			{
+                   				if ((symbols.hashtable2.get(ast.right.left.value).get(i).funcSequence - counter )==symbols.hashtable2.get(lastProg.toUpperCase()).get(0).funcSequence ) {
+                       		    firstvar =symbols.hashtable2.get(ast.right.left.value).get(i);
+                       		    found=true;
+                   				}	
+                   			}
+                   			counter++;
+                   		}	
+                	if((firstvar.type).equals("array"))
                 	{
                 		if(!computing)
                 		{
-                			System.out.printf("movs %d \n",((symbols.hashtable.get(ast.right.left.value)).size));
+                			System.out.printf("movs %d \n",(firstvar.size));
                 		}
                 		else {
                 			SEP--;
-                			SEP = SEP + symbols.hashtable.get(ast.right.left.value).size;
+                			SEP = SEP + firstvar.size;
                 		}
+                	}
+                	else {
+                		if(!computing) {
+                    		System.out.printf("ind \n");
+                    		}
                 	}
                 	}
                 	else
@@ -1341,8 +1634,3 @@ public class homework3 {
                    
                 }
 }
-            
-
-            
-
-            
