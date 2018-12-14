@@ -203,7 +203,7 @@ public class homework3 {
                 }
             	if(!computing)
             	{
-            		System.out.printf("SSP %d \n",ADR);
+            		System.out.printf("ssp %d \n",ADR);
             	}
             	
             	
