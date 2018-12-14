@@ -27,6 +27,7 @@ public class homework3 {
             static int SEP = 0;
             static int MAX_SEP =0;
             static int parameterList=0;
+            static boolean calling=false;
             
             
             	
@@ -1076,7 +1077,7 @@ public class homework3 {
                             	counter++;}
                             	
                             	System.out.printf("lda %d %d\n",(firstvar.funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence),secondvar.addr); 
-                            	if(secondvar.byRef)
+                            	if(secondvar.byRef&&!calling)
                             	{
                             		System.out.printf("ind \n");	
                             	}
@@ -1595,8 +1596,10 @@ public class homework3 {
                 	
                 	if(ast.right.value.equals("identifier")) 
                 	{
+                		boolean temp=calling;
+                		calling=true;
                 		codel(ast.right,symbols);
-                		
+                		calling = temp;
                 		Variable firstvar=new Variable();
                    		boolean found=false;
                    		int counter=0;
@@ -1610,7 +1613,7 @@ public class homework3 {
                    			}
                    			counter++;
                    		}	
-                	if((firstvar.type).equals("array"))
+                	if((firstvar.type).equals("array")||firstvar.type.equals("record"))
                 	{
                 		if(!computing)
                 		{
