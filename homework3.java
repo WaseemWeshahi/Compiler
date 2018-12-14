@@ -1,5 +1,5 @@
 /*
-* Homework 2 in course: Compilers
+* Homework 3 in course: Compilers
 * Submitted By:
 * Waseem Weshahi          206943391
 * Bayan Farhan       	   208300145    
