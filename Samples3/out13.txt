@@ -1,14 +1,18 @@
 H:
 ssp 6
+sep 46
 ujp H_begin
 G:
 ssp 7
+sep 41
 ujp G_begin
 F:
 ssp 7
+sep 17
 ujp F_begin
 P:
 ssp 7
+sep 4
 ujp P_begin
 P_begin:
 lda 0 6

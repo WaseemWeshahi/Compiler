@@ -1,8 +1,10 @@
 P:
 ssp 5
+sep 8
 ujp P_begin
 F:
 ssp 6
+sep 5
 ujp F_begin
 F_begin:
 lda 0 5

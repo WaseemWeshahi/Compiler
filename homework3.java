@@ -70,6 +70,7 @@ public class homework3 {
                         int funcSequence;
                         int SEP;
                         int SSP;
+                        boolean byRef;
                     
                     public Variable(){}
                     public Variable(String new_type,int new_addr,int offs,String new_pointsTo,int new_size,int num) { //maybe without type
@@ -81,6 +82,7 @@ public class homework3 {
                         funcSequence = num;
                         this.SEP =-1;
                         this.SSP=-1;
+                        byRef=false;
 
                         }
 
@@ -97,6 +99,7 @@ public class homework3 {
                         funcSequence = num;
                         this.SEP=-1;
                         this.SSP=-1;
+                        byRef=false;
 
 
                     }
@@ -293,6 +296,7 @@ public class homework3 {
                 hashtable2.get(lastProg.toUpperCase()).get(0).type=var.type;
                 hashtable2.get(lastProg.toUpperCase()).get(0).SSP=ADR;
                 hashtable2.get(lastProg.toUpperCase()).get(0).size=ADR-5;
+                
                 hashtable2.get(lastProg.toUpperCase()).get(0).addr=var.addr;
                 
             	
@@ -337,6 +341,10 @@ public class homework3 {
                         	hashtable2.get(tree.left.left.value).add(var);
                         }
                         ADR++;
+                        if(tree.value.equals("byReference"))
+                        {
+                        	var.byRef=true;
+                        }
                         
                     }
                     else
@@ -353,6 +361,10 @@ public class homework3 {
                         	hashtable2.get(tree.left.left.value).add(var);
                         }
                         ADR++;
+                        if(tree.value.equals("byReference"))
+                        {
+                        	var.byRef=true;
+                        }
                     }
                     SSP+=1;
                 }
@@ -361,7 +373,10 @@ public class homework3 {
                 else if(tree.right.value.equals("record"))
                 {
                 	Variable var = new Variable(tree.right.value,ADR,global_offset,"1",1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
-                    
+                	if(tree.value.equals("byReference"))
+                    {
+                    	var.byRef=true;
+                    }
                     should_increment=1;
                     int temp2=global_offset;
                     global_offset=-1;
@@ -419,6 +434,10 @@ public class homework3 {
                     if(tree.right.right.value.equals("identifier"))
                         type=tree.right.right.left.value;
                     Variable var = new Variable(tree.right.value,ADR,arraysize,sizeOfSlot,dims,subPart,dim,type,FunctionNum);
+                    if(tree.value.equals("byReference"))
+                    {
+                    	var.byRef=true;
+                    }
                     if(!hashtable2.containsKey(tree.left.left.value))
                 	{
                 		List<Variable> list = new ArrayList<>();
@@ -439,7 +458,10 @@ public class homework3 {
                 {
                     Variable var = new Variable(tree.right.value,ADR,global_offset,"1   ",1,FunctionNum); //making a new variable instance, tree.right holds the variable's type
             		
-
+                    if(tree.value.equals("byReference"))
+                    {
+                    	var.byRef=true;
+                    }
                     if(!hashtable2.containsKey(tree.left.left.value))
                 	{
                 		
@@ -451,15 +473,22 @@ public class homework3 {
                     else {
                     	hashtable2.get(tree.left.left.value).add(var);
                     }
-                    ADR++;
+                    if(!var.byRef) {
+                    
+                    	ADR=ADR+size_of(tree.right);
+                    }
+                    else {
+                    	ADR+=1;
+                    }
                     SSP+=1;
                 }
 
 
             }
-            if(tree.value.equals("byValue") && !allowedToEnter)
+            if((tree.value.equals("byValue")|| tree.value.equals("byReference"))&& !allowedToEnter )
             {
             	allowedToEnter=true;
+            	
             	generateSymbolTable(tree);
             	allowedToEnter=false;
             	
@@ -475,6 +504,22 @@ public class homework3 {
             return null;
         }
     }
+    		private static int size_of(AST ast)
+    		{
+    			if(ast.value.equals("int" )|| ast.value.equals("bool")||ast.value.equals("real"))
+    			{
+    				return 1;
+    			}
+    			else if(ast.value.equals("identifier")) {
+
+    				Variable var=new Variable();
+    				int counter=0;
+    				 return SymbolTable.hashtable2.get(ast.left.value).get(0).size;
+    				
+    			}
+    			System.out.printf("you need to add my type!!! %s \n",ast.value);
+    			return 0;
+    		}
 
                 private static void generatePCode(AST ast, SymbolTable symbolTable) {
                                    if(ast == null)
@@ -1031,6 +1076,10 @@ public class homework3 {
                             	counter++;}
                             	
                             	System.out.printf("lda %d %d\n",(firstvar.funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence),secondvar.addr); 
+                            	if(secondvar.byRef)
+                            	{
+                            		System.out.printf("ind \n");	
+                            	}
                         	}
                             else {
                             	SEP++;
@@ -1071,6 +1120,11 @@ public class homework3 {
                                         	}
                                       		System.out.printf("lda %d %d\n",(firstvar.funcSequence-symbols.hashtable2.get(lastProg).get(0).funcSequence),secondvar.addr); 
                         	   		  	  	System.out.printf("ind\n");
+                        	   		  	if(secondvar.byRef)
+                                    	{
+                                    		System.out.printf("ind \n");	
+                                    	}
+                        	   		  	  	
                         	   			}
                                       	else {
                                       		SEP++;
