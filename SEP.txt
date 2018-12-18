@@ -1,0 +1,55 @@
+sample1:
+p - sep 3
+
+sample2:
+p - sep 3
+
+sample3:
+a - sep 4
+
+sample4:
+a - sep 2 
+
+sample5:
+p - sep 2
+
+sample6:
+p - sep 2
+
+sample7:
+p - sep 4
+
+sample8:
+p - sep 3
+
+sample9:
+p - sep 3
+
+sample10:
+p - sep 4
+
+sample11:
+p - sep 10
+f - sep 2
+
+sample12:
+p - sep 8
+f - sep 5
+
+sample13:
+h - sep 46
+g - sep 41
+f - sep 17
+p - sep 4
+
+sample14:
+
+sample15:
+p - sep 11
+f - sep2
+
+sample16:
+p - sep ?
+f - sep ?
+g - sep ?
+
